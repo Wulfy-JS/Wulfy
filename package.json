@@ -1,0 +1,18 @@
+{
+  "name": "red-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "./node_modules/.bin/tsc -p tsconfig.json",
+    "watch": "./node_modules/.bin/tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js"
+  },
+  "author": "80LK",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "typescript": "^4.4.4"
+  }
+}
