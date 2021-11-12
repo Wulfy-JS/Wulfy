@@ -1,10 +1,13 @@
 import SingleOrArr from "../utils/SingleOrArr.js";
 import RouteMethod from "./RouteMethod.js";
+import PTR from "path-to-regexp";
 
-interface RouteOptions {
+interface RouteOptions<T = RegExp> {
 	name: string,
-	path: string,
-	method?: SingleOrArr<RouteMethod>
+	path: T,
+	method?: SingleOrArr<RouteMethod>,
 }
+
+
 
 export default RouteOptions;

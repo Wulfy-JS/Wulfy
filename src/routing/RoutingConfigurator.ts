@@ -1,10 +1,11 @@
 // import { readFileSync } from "fs";
 // import { join } from "path";
+
 import RouteHandler from "./RouteHandler.js";
 import RouteMap from "./RouteMap.js";
 import RouteOptions from "./RouteOptions.js";
 
-type Route = RouteOptions & RouteHandler;
+type Route = RouteOptions<string | RegExp> & RouteHandler;
 
 class RoutingConfigurator {
 	constructor(routes: RouteMap, root: string = "/") {

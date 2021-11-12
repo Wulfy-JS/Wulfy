@@ -1,3 +1,4 @@
+import { IncomingMessage } from "http";
 import JsonResponse from "../response/JsonResponse.js";
 import Response, { Content, HeaderDict } from "../response/Response.js";
 
@@ -11,7 +12,7 @@ abstract class BaseController {
 	}
 	protected __init() { };
 
-	protected index(): Response {
+	protected index(params: NodeJS.Dict<string>, request: IncomingMessage): Response {
 		return this.response("Index controller not implements", 404);
 	}
 

@@ -36,13 +36,32 @@ abstract class Core {
 
 	protected getResponse(req: IncomingMessage): Response {
 		const path = req.url.split("?")[0];
-		const route = this.routes.findRoute(path, req.method);
-		if (!route) {
+		const value = this.routes.findRouteAndKeyByPath(path, req.method);
+		if (!value) {
 			return new Response()
 				.setStatus(404)
 				.setContent(`Route "${path}" not found.`);
 		}
-		const response = new route.controller()[route.handler]();
+		const [route, key, matches] = value;
+		const dictArgs: NodeJS.Dict<string> = {};
+		const mLength = matches.length;
+		const keys = key.keys;
+
+		if (mLength > 1) {
+			if (keys.length == 0) {
+				for (let i = 1; i < mLength; i++) {
+					dictArgs[i - 1] = matches[i];
+				}
+			} else {
+
+				for (let i = 0, lK = keys.length; i < lK; i++) {
+					const key = keys[i];
+					dictArgs[key.name] = matches[i + 1];
+				}
+			}
+		}
+
+		const response = new route.controller()[route.handler](dictArgs, req);
 
 		if (!(response instanceof Response)) {
 			return new Response()
@@ -53,6 +72,5 @@ abstract class Core {
 		return response;
 	}
 }
-
 
 export default Core;
