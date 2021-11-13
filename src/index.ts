@@ -5,6 +5,8 @@ import Config from "./utils/Config.js";
 import Response from "./response/Response.js";
 import JsonResponse from "./response/JsonResponse.js";
 import FileResponse from "./response/FileResponse.js";
+import RenderView from "./RenderView.js";
+
 
 export default Core;
 
@@ -13,6 +15,8 @@ export {
 	Config,
 
 	BaseController,
+
+	RenderView,
 
 	Response,
 	JsonResponse,

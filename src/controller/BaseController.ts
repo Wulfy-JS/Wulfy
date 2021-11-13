@@ -1,5 +1,6 @@
 import { IncomingMessage } from "http";
 import { FileResponse } from "../index.js";
+import RenderView from "../RenderView.js";
 import BaseResponse, { HeaderDict } from "../response/BaseResponse.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Response from "../response/Response.js";
@@ -38,6 +39,12 @@ abstract class BaseController {
 			.setStatus(status)
 			.setHeaders(headers)
 			.setFile(path);
+	}
+
+	protected async render(file: string, params: NodeJS.Dict<any> = {}, status: number = 200, headers: HeaderDict = {}) {
+		return (await new RenderView().render(file, params))
+			.setStatus(status)
+			.setHeaders(headers);
 	}
 }
 

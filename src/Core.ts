@@ -1,6 +1,6 @@
 
 import { existsSync, statSync } from "fs";
-import { IncomingMessage } from "http";
+import { IncomingMessage, ServerResponse } from "http";
 import { FileResponse } from "./index.js";
 import BaseResponse from "./response/BaseResponse.js";
 import Response from "./response/Response.js";
@@ -54,7 +54,7 @@ abstract class Core {
 		return false;
 	}
 
-	protected getResponse(req: IncomingMessage): BaseResponse {
+	private async getResponse(req: IncomingMessage): Promise<BaseResponse> {
 		const path = req.url.split("?")[0];
 
 		if (["get", "head"].indexOf(req.method.toLowerCase()) != -1) {
@@ -88,7 +88,9 @@ abstract class Core {
 			}
 		}
 
-		const response = new route.controller()[route.handler](dictArgs, req);
+		let response = new route.controller()[route.handler](dictArgs, req);
+		if (response instanceof Promise)
+			response = await response;
 
 		if (!(response instanceof BaseResponse)) {
 			return new Response()
@@ -97,6 +99,11 @@ abstract class Core {
 		}
 
 		return response;
+	}
+
+	protected async response(req: IncomingMessage, res: ServerResponse) {
+		const response = await this.getResponse(req);
+		response.response(res);
 	}
 }
 
