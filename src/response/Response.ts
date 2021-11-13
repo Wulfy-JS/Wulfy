@@ -1,13 +1,14 @@
+import { Readable } from "stream";
 import SingleOrROArr from "../utils/SingleOrROArr";
 
 type Header = number | SingleOrROArr<string>;
 type HeaderDict = NodeJS.Dict<Header>;
-type Content = string | Buffer;
+type Content = string | Buffer | Readable;
 
-class Response {
-	protected status: number;
+class Response<C extends Content = Content> {
+	protected status: number = 200;
 	protected headers: HeaderDict = {};
-	protected content: Content;
+	protected content: C | null = null;
 
 	public setHeader(key: string, value: Header) {
 		this.headers[key] = value;
@@ -34,11 +35,11 @@ class Response {
 	}
 
 
-	public setContent(content: Content) {
+	public setContent(content: C | null) {
 		this.content = content;
 		return this;
 	}
-	public getContent() {
+	public getContent(): C | null {
 		return this.content;
 	}
 }

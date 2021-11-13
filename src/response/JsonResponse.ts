@@ -1,6 +1,6 @@
 import Response from "./Response.js";
 
-class JsonResponse extends Response {
+class JsonResponse extends Response<string> {
 	public getHeaders() {
 		return Object.assign(super.getHeaders(), { "content-type": "application/json" });
 	}

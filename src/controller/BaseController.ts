@@ -1,6 +1,7 @@
 import { IncomingMessage } from "http";
+import { FileResponse } from "../index.js";
 import JsonResponse from "../response/JsonResponse.js";
-import Response, { Content, HeaderDict } from "../response/Response.js";
+import Response, { Content, Header, HeaderDict } from "../response/Response.js";
 
 interface BaseControllerConstructor {
 	new(): BaseController;
@@ -28,6 +29,13 @@ abstract class BaseController {
 			.setContent(obj)
 			.setStatus(status)
 			.setHeaders(headers);
+	}
+
+	protected file(path: string, status: number = 200, headers: HeaderDict = {}) {
+		return new FileResponse()
+			.setStatus(status)
+			.setHeaders(headers)
+			.setFile(path);
 	}
 }
 

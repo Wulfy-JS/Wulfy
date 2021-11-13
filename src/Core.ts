@@ -1,14 +1,21 @@
 
+import { existsSync, readFileSync, statSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
 import { BaseControllerConstructor } from "./controller/BaseController.js";
+import { FileResponse } from "./index.js";
 import Response from "./response/Response.js";
 import RouteMap from "./routing/RouteMap.js";
 import RoutingConfigurator from "./routing/RoutingConfigurator.js";
+import StaticRoute from "./routing/StaticRoute.js";
 import Config from "./utils/Config.js";
 
 abstract class Core {
 	protected readonly projectFolder = process.cwd();
 	protected readonly routes = new RouteMap();
+	protected staticRoute: StaticRoute = {
+		path: "/",
+		folder: "/public"
+	};
 	// protected readonly config = new Config();
 
 	private __inited = false;
@@ -17,7 +24,7 @@ abstract class Core {
 	private init() {
 		if (this.__inited) return;
 
-		this.configureRoutes(new RoutingConfigurator(this.routes, this.projectFolder));
+		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
 
 		this.__init();
 		this.__inited = true;
@@ -34,13 +41,34 @@ abstract class Core {
 
 	protected configureRoutes(routes: RoutingConfigurator): void { }
 
+	private getStatic(path: string) {
+		if (path.startsWith(this.staticRoute.path)) {
+			const file = path.replace(this.staticRoute.path, "");
+			const pathToFile = `${this.projectFolder}/${this.staticRoute.folder}/${file}`;
+
+			if (existsSync(pathToFile) && statSync(pathToFile).isFile()) {
+				return new FileResponse()
+					.setStatus(200)
+					.setFile(pathToFile);
+			}
+		}
+		return false;
+	}
+
 	protected getResponse(req: IncomingMessage): Response {
 		const path = req.url.split("?")[0];
+
+		if (["get", "head"].indexOf(req.method.toLowerCase()) != -1) {
+			const staticResponse = this.getStatic(path);
+			if (staticResponse)
+				return staticResponse;
+		}
+
 		const value = this.routes.findRouteAndKeyByPath(path, req.method);
 		if (!value) {
 			return new Response()
 				.setStatus(404)
-				.setContent(`Route "${path}" not found.`);
+				.setContent(`Route "${req.method.toUpperCase()}: ${path}" not found.`);
 		}
 		const [route, key, matches] = value;
 		const dictArgs: NodeJS.Dict<string> = {};
