@@ -31,12 +31,15 @@ abstract class Core {
 	}
 
 	protected __launch(): void { };
+	protected __shutdown(): void { };
 
 	public launch() {
 		this.init();
 		this.__launch();
 	};
-	public abstract shutdown(): void;
+	public shutdown(): void {
+		this.__shutdown()
+	};
 
 	protected abstract configureRoutes(routes: RoutingConfigurator): void;
 
