@@ -1,10 +1,10 @@
-import ejs from "ejs";
+import nunjucks from "nunjucks";
 import Response from "./response/Response.js";
-const { renderFile } = ejs;
+nunjucks.configure("./src/views");
 
 class RenderView {
-	public async render(file: string, params: NodeJS.Dict<any> = {}) {
-		const content = await renderFile("./src/views/" + file, params);
+	public render(file: string, params: NodeJS.Dict<any> = {}) {
+		const content = nunjucks.render(file, params);
 		return new Response()
 			.setContent(content);
 	}
