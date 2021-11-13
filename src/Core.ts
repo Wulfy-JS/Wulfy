@@ -1,13 +1,12 @@
 
-import { existsSync, readFileSync, statSync } from "fs";
-import { IncomingMessage, ServerResponse } from "http";
-import { BaseControllerConstructor } from "./controller/BaseController.js";
+import { existsSync, statSync } from "fs";
+import { IncomingMessage } from "http";
 import { FileResponse } from "./index.js";
+import BaseResponse from "./response/BaseResponse.js";
 import Response from "./response/Response.js";
 import RouteMap from "./routing/RouteMap.js";
 import RoutingConfigurator from "./routing/RoutingConfigurator.js";
 import StaticRoute from "./routing/StaticRoute.js";
-import Config from "./utils/Config.js";
 
 abstract class Core {
 	protected readonly projectFolder = process.cwd();
@@ -55,7 +54,7 @@ abstract class Core {
 		return false;
 	}
 
-	protected getResponse(req: IncomingMessage): Response {
+	protected getResponse(req: IncomingMessage): BaseResponse {
 		const path = req.url.split("?")[0];
 
 		if (["get", "head"].indexOf(req.method.toLowerCase()) != -1) {
@@ -91,7 +90,7 @@ abstract class Core {
 
 		const response = new route.controller()[route.handler](dictArgs, req);
 
-		if (!(response instanceof Response)) {
+		if (!(response instanceof BaseResponse)) {
 			return new Response()
 				.setStatus(500)
 				.setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);

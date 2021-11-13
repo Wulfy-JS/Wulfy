@@ -1,12 +1,16 @@
-import Response from "./Response.js";
+import { ServerResponse } from "http";
+import BaseResponse from "./BaseResponse.js";
 
-class JsonResponse extends Response<string> {
+class JsonResponse extends BaseResponse<any> {
 	public getHeaders() {
 		return Object.assign(super.getHeaders(), { "content-type": "application/json" });
 	}
-	public setContent(content: any) {
-		super.setContent(JSON.stringify(content));
-		return this;
+
+	protected __response(res: ServerResponse) {
+		const content = this.getContent();
+		if (content != null)
+			res.write(JSON.stringify(content));
+		res.end();
 	}
 }
 
