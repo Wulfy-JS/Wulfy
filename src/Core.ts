@@ -38,7 +38,7 @@ abstract class Core {
 	};
 	public abstract shutdown(): void;
 
-	protected configureRoutes(routes: RoutingConfigurator): void { }
+	protected abstract configureRoutes(routes: RoutingConfigurator): void;
 
 	private getStatic(path: string) {
 		if (path.startsWith(this.staticRoute.path)) {
