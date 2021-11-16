@@ -27,7 +27,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return this;
 	}
 	private static initModel() {
-		Model.init.bind(this)(this._attributes, this._options);
+		Model.init.bind(this)(this._attributes, { ...this._options, sequelize: this._sequelize });
 	}
 
 	public static setup(sequelize: Sequelize) {
