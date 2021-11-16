@@ -1,12 +1,17 @@
 
 import { existsSync, statSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
-import { FileResponse } from "./index.js";
-import BaseResponse from "./response/BaseResponse.js";
-import Response from "./response/Response.js";
-import RouteMap from "./routing/RouteMap.js";
-import RoutingConfigurator from "./routing/RoutingConfigurator.js";
-import StaticRoute from "./routing/StaticRoute.js";
+
+import Config from "../utils/Config.js";
+import FileResponse from "../response/FileResponse.js";
+import BaseResponse from "../response/BaseResponse.js";
+import Response from "../response/Response.js";
+import RouteMap from "../routing/RouteMap.js";
+import RoutingConfigurator from "../routing/RoutingConfigurator.js";
+import StaticRoute from "../routing/StaticRoute.js";
+import sequelize from "sequelize";
+import { BaseModel } from "../index.js";
+const { Sequelize } = sequelize;
 
 abstract class Core {
 	protected readonly projectFolder = process.cwd();
@@ -15,7 +20,7 @@ abstract class Core {
 		path: "/",
 		folder: "/public"
 	};
-	// protected readonly config = new Config();
+	protected readonly config = new Config();
 
 	private __inited = false;
 	protected __init(): void { };
@@ -23,7 +28,9 @@ abstract class Core {
 	private init() {
 		if (this.__inited) return;
 
+		this.configure(this.config);
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
+		BaseModel.setup(new Sequelize(this.config.get<string>("database")));
 
 		this.__init();
 		this.__inited = true;
@@ -41,6 +48,7 @@ abstract class Core {
 		this.__shutdown()
 	};
 
+	protected abstract configure(config: Config): void;
 	protected abstract configureRoutes(routes: RoutingConfigurator): void;
 
 	private getStatic(path: string) {
