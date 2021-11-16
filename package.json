@@ -1,7 +1,7 @@
 {
   "name": "red-project-t",
   "version": "1.0.4",
-  "description": "",
+  "description": "Red Project",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
