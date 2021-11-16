@@ -11,6 +11,7 @@ import RoutingConfigurator from "../routing/RoutingConfigurator.js";
 import StaticRoute from "../routing/StaticRoute.js";
 import sequelize from "sequelize";
 import { BaseModel } from "../index.js";
+import ErrorResponse from "../response/ErrorResponse.js";
 const { Sequelize } = sequelize;
 
 abstract class Core {
@@ -29,9 +30,12 @@ abstract class Core {
 		if (this.__inited) return;
 
 		this.configure(this.config);
+
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
+
 		const seq = new Sequelize(this.config.get<string>("database"))
-		seq.sync({ force: true });
+		if (this.config.get("mode", "dev").toLowerCase() === "dev")
+			seq.sync({ force: true });
 		BaseModel.setup(seq);
 
 		this.__init();
@@ -113,15 +117,15 @@ abstract class Core {
 			}
 			return response;
 		} catch (e) {
-			return new Response()
+			return new ErrorResponse()
 				.setStatus(500)
-				.setContent(e instanceof Error ? e.message : e);
+				.setContent(e instanceof Error ? e : new Error(e));
 		}
 	}
 
 	protected async response(req: IncomingMessage, res: ServerResponse) {
 		const response = await this.getResponse(req);
-		response.response(res);
+		response.response(res, this.config);
 	}
 }
 

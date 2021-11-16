@@ -1,4 +1,5 @@
 import { ServerResponse } from "http";
+import { Config } from "..";
 import SingleOrArr from "../utils/SingleOrROArr";
 
 type Header = number | SingleOrArr<string>;
@@ -51,10 +52,10 @@ abstract class BaseResponse<T = any> {
 			res.setHeader(key, value);
 		}
 	}
-	protected abstract __response(res: ServerResponse);
-	public response(res: ServerResponse) {
+	protected abstract __response(res: ServerResponse, config: Config);
+	public response(res: ServerResponse, config: Config) {
 		this.__setHeaders(res);
-		this.__response(res);
+		this.__response(res, config);
 	}
 
 }
