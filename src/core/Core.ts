@@ -30,7 +30,9 @@ abstract class Core {
 
 		this.configure(this.config);
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
-		BaseModel.setup(new Sequelize(this.config.get<string>("database")));
+		const seq = new Sequelize(this.config.get<string>("database"))
+		seq.sync({ force: true });
+		BaseModel.setup(seq);
 
 		this.__init();
 		this.__inited = true;
