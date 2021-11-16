@@ -101,17 +101,22 @@ abstract class Core {
 			}
 		}
 
-		let response = new route.controller()[route.handler](dictArgs, req);
-		if (response instanceof Promise)
-			response = await response;
+		try {
+			let response = new route.controller()[route.handler](dictArgs, req);
+			if (response instanceof Promise)
+				response = await response;
 
-		if (!(response instanceof BaseResponse)) {
+			if (!(response instanceof BaseResponse)) {
+				return new Response()
+					.setStatus(500)
+					.setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
+			}
+			return response;
+		} catch (e) {
 			return new Response()
 				.setStatus(500)
-				.setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
+				.setContent(e instanceof Error ? e.message : e);
 		}
-
-		return response;
 	}
 
 	protected async response(req: IncomingMessage, res: ServerResponse) {
