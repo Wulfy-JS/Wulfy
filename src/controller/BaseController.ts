@@ -16,7 +16,7 @@ abstract class BaseController {
 	}
 	protected __init() { };
 
-	protected index(params: NodeJS.Dict<string>, request: IncomingMessage): BaseResponse {
+	protected index(params: NodeJS.Dict<string>, request: IncomingMessage): Promise<BaseResponse> | BaseResponse {
 		return this.response("Index controller not implements", 404);
 	}
 
