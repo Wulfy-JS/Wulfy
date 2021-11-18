@@ -1,7 +1,8 @@
 {
-  "name": "red-project-t",
-  "version": "1.0.7",
+  "name": "red-project",
+  "version": "1.0.0",
   "description": "Red Project",
+  "repository": "https://github.com/80LK/Red-Project",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
