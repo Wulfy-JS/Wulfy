@@ -13,6 +13,7 @@ import sequelize from "sequelize";
 import { BaseModel } from "../index.js";
 import ErrorResponse from "../response/ErrorResponse.js";
 const { Sequelize } = sequelize;
+
 interface DataBaseConfig {
 	url: string;
 	mode?: "force" | "alter" | "prod"
@@ -25,6 +26,11 @@ abstract class Core {
 		folder: "/public"
 	};
 	protected readonly config = new Config();
+	private _sequelize: sequelize.Sequelize;
+	protected get sequelize() {
+		return this._sequelize;
+	}
+
 
 	private __inited = false;
 	protected __init(): void { };
@@ -43,11 +49,11 @@ abstract class Core {
 		if (!databaseConfig.mode)
 			databaseConfig.mode = "prod";
 
-		const seq = new Sequelize(databaseConfig.url);
+		this._sequelize = new Sequelize(databaseConfig.url);
 		if (this.config.get("mode", "dev").toLowerCase() === "dev" &&
 			databaseConfig.mode != "prod"
-		) seq.sync({ [databaseConfig.mode]: true });
-		BaseModel.setup(seq);
+		) this._sequelize.sync({ [databaseConfig.mode]: true });
+		BaseModel.setup(this._sequelize);
 
 
 		this.__init();
