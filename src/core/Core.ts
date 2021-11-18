@@ -13,7 +13,10 @@ import sequelize from "sequelize";
 import { BaseModel } from "../index.js";
 import ErrorResponse from "../response/ErrorResponse.js";
 const { Sequelize } = sequelize;
-
+interface DataBaseConfig {
+	url: string;
+	mode?: "force" | "alter" | "prod"
+}
 abstract class Core {
 	protected readonly projectFolder = process.cwd();
 	protected readonly routes = new RouteMap();
@@ -33,10 +36,19 @@ abstract class Core {
 
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
 
-		const seq = new Sequelize(this.config.get<string>("database"))
-		if (this.config.get("mode", "dev").toLowerCase() === "dev")
-			seq.sync({ force: true });
+		let databaseConfig = this.config.get<DataBaseConfig | string>("database");
+		if (typeof databaseConfig == "string")
+			databaseConfig = { url: databaseConfig };
+
+		if (!databaseConfig.mode)
+			databaseConfig.mode = "prod";
+
+		const seq = new Sequelize(databaseConfig.url);
+		if (this.config.get("mode", "dev").toLowerCase() === "dev" &&
+			databaseConfig.mode != "prod"
+		) seq.sync({ [databaseConfig.mode]: true });
 		BaseModel.setup(seq);
+
 
 		this.__init();
 		this.__inited = true;
