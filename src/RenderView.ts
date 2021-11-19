@@ -6,7 +6,7 @@ class RenderView {
 		const content = nunjucks.render(file, params);
 		return new Response()
 			.setContent(content)
-			.setHeader("Content-Type", "text/html; charset=" + charset);
+			.setHeader("content-type", "text/html; charset=" + charset);
 	}
 }
 

@@ -2,6 +2,7 @@ import { createReadStream, PathLike } from "fs";
 import { ServerResponse } from "http";
 import { Readable } from "stream";
 import BaseResponse from "./BaseResponse.js";
+import mime from "mime";
 
 class FileResponse extends BaseResponse<Readable> {
 	protected __response(res: ServerResponse) {
@@ -10,8 +11,9 @@ class FileResponse extends BaseResponse<Readable> {
 		else res.end();;
 	}
 
-	public setFile(path: PathLike) {
-		this.setContent(createReadStream(path));
+	public setFile(path: string, encoding?: BufferEncoding) {
+		this.setHeader("content-type", mime.getType(path) + (encoding || ""));
+		this.setContent(createReadStream(path, { encoding: encoding }));
 		return this;
 	}
 }
