@@ -1,6 +1,7 @@
 
 import { existsSync, statSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
+import nunjucks from "nunjucks";
 
 import Config from "../utils/Config.js";
 import FileResponse from "../response/FileResponse.js";
@@ -39,6 +40,9 @@ abstract class Core {
 		if (this.__inited) return;
 
 		this.configure(this.config);
+
+
+		nunjucks.configure("./src/views");
 
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
 

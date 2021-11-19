@@ -41,8 +41,13 @@ abstract class BaseController {
 			.setFile(path);
 	}
 
+	protected async render(file: string, params?: NodeJS.Dict<any>, status?: number, headers?: HeaderDict): Promise<Response>;
+	protected async render(file: string, params: { charset: BufferEncoding, [key: string]: string }, status?: number, headers?: HeaderDict): Promise<Response>;
 	protected async render(file: string, params: NodeJS.Dict<any> = {}, status: number = 200, headers: HeaderDict = {}) {
-		return (await new RenderView().render(file, params))
+		const charset = params.charset || undefined;
+		delete params.charset;
+
+		return (await new RenderView().render(file, params, charset))
 			.setStatus(status)
 			.setHeaders(headers);
 	}

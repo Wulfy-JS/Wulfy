@@ -1,12 +1,12 @@
 import nunjucks from "nunjucks";
 import Response from "./response/Response.js";
-nunjucks.configure("./src/views");
 
 class RenderView {
-	public render(file: string, params: NodeJS.Dict<any> = {}) {
+	public render(file: string, params: NodeJS.Dict<any> = {}, charset: BufferEncoding = "utf-8") {
 		const content = nunjucks.render(file, params);
 		return new Response()
-			.setContent(content);
+			.setContent(content)
+			.setHeader("Content-Type", "text/html; charset=" + charset);
 	}
 }
 
