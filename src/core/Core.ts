@@ -41,8 +41,7 @@ abstract class Core {
 
 		this.configure(this.config);
 
-
-		nunjucks.configure("./src/views");
+		nunjucks.configure(this.projectFolder + "/" + this.config.get("views", "src/views"));
 
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
 
