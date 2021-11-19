@@ -1,20 +1,39 @@
-import { createReadStream, PathLike } from "fs";
+import { createReadStream } from "fs";
 import { ServerResponse } from "http";
 import { Readable } from "stream";
 import BaseResponse from "./BaseResponse.js";
 import mime from "mime";
 
 class FileResponse extends BaseResponse<Readable> {
+	private _mime: string = "text/plain";
+	private _encoding: BufferEncoding = "utf-8";
+
 	protected __response(res: ServerResponse) {
 		const content = this.getContent();
+		res.setHeader("content-type", `${this._mime}; charset=${this._encoding}`)
 		if (content) content.pipe(res);
-		else res.end();;
+		else res.end();
 	}
 
-	public setFile(path: string, encoding?: BufferEncoding) {
-		this.setHeader("content-type", mime.getType(path) + (encoding || ""));
-		this.setContent(createReadStream(path, { encoding: encoding }));
+	public setMime(mime: string) {
+		this._mime = mime;
 		return this;
+	}
+	public getMime() {
+		return this._mime;
+	}
+	public setEncoding(encoding: BufferEncoding) {
+		this._encoding = encoding;
+		return this;
+	}
+	public getEncoding() {
+		return this._encoding;
+	}
+
+	public setFile(path: string, encoding: BufferEncoding = "utf-8") {
+		return this.setMime(mime.getType(path))
+			.setEncoding(encoding)
+			.setContent(createReadStream(path, { encoding }));
 	}
 }
 
