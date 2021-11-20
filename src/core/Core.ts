@@ -44,7 +44,7 @@ abstract class Core {
 	public get services(): ListServices {
 		return <ListServices>Object.assign({}, this.serviceList);
 	}
-	protected localRenderService = new RenderSevice(this, this.moduleFolder + "/views");
+	protected localRenderService = new RenderSevice(this, this.moduleFolder + "/views/");
 
 	private __inited = false;
 	protected __init(): void { };
@@ -122,7 +122,7 @@ abstract class Core {
 		const value = this.routes.findRouteAndKeyByPath(path, req.method);
 		if (!value) {
 			return this.localRenderService
-				.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "The file was not found :(" })
+				.render("error.njk", { error: 500, message: "The file was not found :(" })
 				.setStatus(404);
 			// Response()
 			// 	.setStatus(404)
@@ -154,14 +154,14 @@ abstract class Core {
 
 			if (!(response instanceof BaseResponse)) {
 				return this.localRenderService
-					.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "Something happened and the app broke :(" })
+					.render("error.njk", { error: 500, message: "Something happened and the app broke :(" })
 					.setStatus(500);
 				return new Response().setStatus(500).setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
 			}
 			return response;
 		} catch (e) {
 			return this.localRenderService
-				.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "Something happened and the app broke :(" })
+				.render("error.njk", { error: 500, message: "Something happened and the app broke :(" })
 				.setStatus(500);
 		}
 	}
