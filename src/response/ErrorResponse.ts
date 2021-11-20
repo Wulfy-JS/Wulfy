@@ -1,5 +1,5 @@
 import { ServerResponse } from "http";
-import { Config, RenderView } from "..";
+import { Config } from "..";
 import BaseResponse from "./BaseResponse.js";
 
 class ErrorResponse extends BaseResponse<Error> {

@@ -17,7 +17,7 @@ export {
 
 	BaseController,
 
-	RenderSevice as RenderView,
+	RenderSevice,
 
 	Response,
 	JsonResponse,
