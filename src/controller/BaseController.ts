@@ -1,17 +1,18 @@
 import { IncomingMessage } from "http";
 import { FileResponse } from "../index.js";
-import RenderView from "../RenderView.js";
+import RenderSevice from "../services/RenderService.js";
 import BaseResponse, { HeaderDict } from "../response/BaseResponse.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Response from "../response/Response.js";
+import ListServices from "../services/ListServices.js"
 
 
 interface BaseControllerConstructor {
-	new(): BaseController;
+	new(services: ListServices): BaseController;
 }
 
 abstract class BaseController {
-	constructor() {
+	constructor(protected services: ListServices) {
 		this.__init();
 	}
 	protected __init() { };
@@ -47,7 +48,7 @@ abstract class BaseController {
 		const charset = params.charset || undefined;
 		delete params.charset;
 
-		return (await new RenderView().render(file, params, charset))
+		return (await this.services.RenderService.render(file, params, charset))
 			.setStatus(status)
 			.setHeaders(headers);
 	}

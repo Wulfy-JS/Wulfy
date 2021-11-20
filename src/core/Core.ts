@@ -13,8 +13,10 @@ import Response from "../response/Response.js";
 import RouteMap from "../routing/RouteMap.js";
 import RoutingConfigurator from "../routing/RoutingConfigurator.js";
 import StaticRoute from "../routing/StaticRoute.js";
-import { BaseModel, RenderView } from "../index.js";
-import ErrorResponse from "../response/ErrorResponse.js";
+import BaseModel from "../model/BaseModel.js"
+import ListServices from "../services/ListServices.js";
+import RenderSevice from "../services/RenderService.js";
+import "../services/RenderService.js";
 
 
 interface DataBaseConfig {
@@ -22,19 +24,27 @@ interface DataBaseConfig {
 	mode?: "force" | "alter" | "prod"
 }
 abstract class Core {
-	protected readonly projectFolder = process.cwd();
+	public readonly projectFolder = process.cwd();
 	protected readonly moduleFolder = normalize(import.meta.url + "/../../../");
+	public readonly config = new Config();
+
 	protected readonly routes = new RouteMap();
 	protected staticRoute: StaticRoute = {
 		path: "/",
 		folder: "/public"
 	};
-	protected readonly config = new Config();
+
+
 	private _sequelize: sequelize.Sequelize;
 	protected get sequelize() {
 		return this._sequelize;
 	}
 
+	private serviceList: Partial<ListServices> = {}
+	public get services(): ListServices {
+		return <ListServices>Object.assign({}, this.serviceList);
+	}
+	protected localRenderService = new RenderSevice(this, this.moduleFolder + "/views");
 
 	private __inited = false;
 	protected __init(): void { };
@@ -42,12 +52,16 @@ abstract class Core {
 	private init() {
 		if (this.__inited) return;
 
+		//Config
 		this.configure(this.config);
 
-		nunjucks.configure(this.projectFolder + "/" + this.config.get("views", "src/views"));
+		//Services
+		this.serviceList.RenderService = new RenderSevice(this);
 
+		//Routes
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
 
+		//DataBase(Models)
 		let databaseConfig = this.config.get<DataBaseConfig | string>("database");
 		if (typeof databaseConfig == "string")
 			databaseConfig = { url: databaseConfig };
@@ -62,6 +76,7 @@ abstract class Core {
 		BaseModel.setup(this._sequelize);
 
 
+		//Core
 		this.__init();
 		this.__inited = true;
 		return this;
@@ -106,7 +121,7 @@ abstract class Core {
 
 		const value = this.routes.findRouteAndKeyByPath(path, req.method);
 		if (!value) {
-			return new RenderView()
+			return this.localRenderService
 				.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "The file was not found :(" })
 				.setStatus(404);
 			// Response()
@@ -133,19 +148,19 @@ abstract class Core {
 		}
 
 		try {
-			let response = new route.controller()[route.handler](dictArgs, req);
+			let response = new route.controller(this.services)[route.handler](dictArgs, req);
 			if (response instanceof Promise)
 				response = await response;
 
 			if (!(response instanceof BaseResponse)) {
-				return new RenderView()
+				return this.localRenderService
 					.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "Something happened and the app broke :(" })
 					.setStatus(500);
 				return new Response().setStatus(500).setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
 			}
 			return response;
 		} catch (e) {
-			return new RenderView()
+			return this.localRenderService
 				.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "Something happened and the app broke :(" })
 				.setStatus(500);
 		}

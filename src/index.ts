@@ -5,7 +5,7 @@ import Config from "./utils/Config.js";
 import Response from "./response/Response.js";
 import JsonResponse from "./response/JsonResponse.js";
 import FileResponse from "./response/FileResponse.js";
-import RenderView from "./RenderView.js";
+import RenderSevice from "./services/RenderService.js";
 import BaseModel from "./model/BaseModel.js";
 
 
@@ -17,7 +17,7 @@ export {
 
 	BaseController,
 
-	RenderView,
+	RenderSevice as RenderView,
 
 	Response,
 	JsonResponse,
