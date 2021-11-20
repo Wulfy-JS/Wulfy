@@ -23,7 +23,7 @@ interface DataBaseConfig {
 }
 abstract class Core {
 	protected readonly projectFolder = process.cwd();
-	protected readonly moduleFolder = normalize(import.meta.url + "/../../");
+	protected readonly moduleFolder = normalize(import.meta.url + "/../../../");
 	protected readonly routes = new RouteMap();
 	protected staticRoute: StaticRoute = {
 		path: "/",
