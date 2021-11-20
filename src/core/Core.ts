@@ -1,7 +1,10 @@
 
 import { existsSync, statSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
+import { normalize } from "path";
 import nunjucks from "nunjucks";
+import sequelize from "sequelize";
+const { Sequelize } = sequelize;
 
 import Config from "../utils/Config.js";
 import FileResponse from "../response/FileResponse.js";
@@ -10,10 +13,9 @@ import Response from "../response/Response.js";
 import RouteMap from "../routing/RouteMap.js";
 import RoutingConfigurator from "../routing/RoutingConfigurator.js";
 import StaticRoute from "../routing/StaticRoute.js";
-import sequelize from "sequelize";
-import { BaseModel } from "../index.js";
+import { BaseModel, RenderView } from "../index.js";
 import ErrorResponse from "../response/ErrorResponse.js";
-const { Sequelize } = sequelize;
+
 
 interface DataBaseConfig {
 	url: string;
@@ -21,6 +23,7 @@ interface DataBaseConfig {
 }
 abstract class Core {
 	protected readonly projectFolder = process.cwd();
+	protected readonly moduleFolder = normalize(import.meta.url + "/../../");
 	protected readonly routes = new RouteMap();
 	protected staticRoute: StaticRoute = {
 		path: "/",
@@ -103,9 +106,12 @@ abstract class Core {
 
 		const value = this.routes.findRouteAndKeyByPath(path, req.method);
 		if (!value) {
-			return new Response()
-				.setStatus(404)
-				.setContent(`Route "${req.method.toUpperCase()}: ${path}" not found.`);
+			return new RenderView()
+				.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "The file was not found :(" })
+				.setStatus(404);
+			// Response()
+			// 	.setStatus(404)
+			// 	.setContent(`Route "${req.method.toUpperCase()}: ${path}" not found.`);
 		}
 		const [route, key, matches] = value;
 		const dictArgs: NodeJS.Dict<string> = {};
@@ -132,15 +138,16 @@ abstract class Core {
 				response = await response;
 
 			if (!(response instanceof BaseResponse)) {
-				return new Response()
-					.setStatus(500)
-					.setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
+				return new RenderView()
+					.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "Something happened and the app broke :(" })
+					.setStatus(500);
+				return new Response().setStatus(500).setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
 			}
 			return response;
 		} catch (e) {
-			return new ErrorResponse()
-				.setStatus(500)
-				.setContent(e instanceof Error ? e : new Error(e));
+			return new RenderView()
+				.render(this.moduleFolder + "/views/error.njk", { error: 500, message: "Something happened and the app broke :(" })
+				.setStatus(500);
 		}
 	}
 
