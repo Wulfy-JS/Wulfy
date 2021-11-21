@@ -26,6 +26,9 @@
     "sequelize": "^6.9.0",
     "simcfg": "^1.0.3"
   },
+  "peerDependencies": {
+    "chokidar": "^3.5.2"
+  },
   "peerDependenciesMeta": {
     "pg": {
       "optional": true

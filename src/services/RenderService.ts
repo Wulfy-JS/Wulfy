@@ -9,10 +9,10 @@ class RenderSevice extends BaseService {
 		super(config);
 		if (!path) path = config.get("views", "src/views");
 		const isDev = config.get("mode", "dev") === "dev";
-		this._e = new nunjucks.Environment(new nunjucks.FileSystemLoader(path), {
+		this._e = new nunjucks.Environment(new nunjucks.FileSystemLoader(path, {
 			watch: isDev,
 			noCache: isDev
-		});
+		}));
 	}
 
 	public render(file: string, params: NodeJS.Dict<any> = {}, charset: BufferEncoding = "utf-8") {
