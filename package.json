@@ -1,6 +1,6 @@
 {
   "name": "red-project",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Red Project",
   "repository": "https://github.com/80LK/Red-Project",
   "main": "dist/index.js",
