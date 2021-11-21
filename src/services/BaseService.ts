@@ -1,7 +1,6 @@
-import Core from "..";
+import Config from "simcfg";
 
 abstract class BaseService {
-	private _service;
-	constructor(core: Core) { }
+	constructor(core: Config) { }
 }
 export default BaseService;

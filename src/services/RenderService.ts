@@ -1,13 +1,13 @@
 import nunjucks from "nunjucks";
-import Core from "../index.js";
+import Config from "simcfg";
 import Response from "../response/Response.js";
 import BaseService from "./BaseService.js";
 
 class RenderSevice extends BaseService {
 	private _e: nunjucks.Environment;
-	constructor(core: Core, path?: string) {
-		super(core);
-		if (!path) path = core.projectFolder + "/" + core.config.get("views", "src/views");
+	constructor(config: Config, path?: string) {
+		super(config);
+		if (!path) path = config.get("views", "src/views");
 		this._e = new nunjucks.Environment(new nunjucks.FileSystemLoader(path));
 	}
 

@@ -2,11 +2,10 @@
 import { existsSync, statSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
 import { normalize } from "path";
-import nunjucks from "nunjucks";
+import Config from "simcfg";
 import sequelize from "sequelize";
 const { Sequelize } = sequelize;
 
-import Config from "../utils/Config.js";
 import FileResponse from "../response/FileResponse.js";
 import BaseResponse from "../response/BaseResponse.js";
 import Response from "../response/Response.js";
@@ -16,7 +15,8 @@ import StaticRoute from "../routing/StaticRoute.js";
 import BaseModel from "../model/BaseModel.js"
 import ListServices from "../services/ListServices.js";
 import RenderSevice from "../services/RenderService.js";
-import "../services/RenderService.js";
+// import "../services/RenderService.js";
+import final from "../utils/final.js";
 
 
 interface DataBaseConfig {
@@ -44,7 +44,7 @@ abstract class Core {
 	public get services(): ListServices {
 		return <ListServices>Object.assign({}, this.serviceList);
 	}
-	protected localRenderService = new RenderSevice(this, this.moduleFolder + "/views/");
+	protected localRenderService = new RenderSevice(this.config, this.moduleFolder + "/views/");
 
 	private __inited = false;
 	protected __init(): void { };
@@ -56,7 +56,7 @@ abstract class Core {
 		this.configure(this.config);
 
 		//Services
-		this.serviceList.RenderService = new RenderSevice(this);
+		this.serviceList.RenderService = new RenderSevice(this.config);
 
 		//Routes
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
@@ -85,10 +85,12 @@ abstract class Core {
 	protected __launch(): void { };
 	protected __shutdown(): void { };
 
+	@final
 	public launch() {
 		this.init();
 		this.__launch();
 	};
+	@final
 	public shutdown(): void {
 		this.__shutdown()
 	};
@@ -99,7 +101,7 @@ abstract class Core {
 	private getStatic(path: string) {
 		if (path.startsWith(this.staticRoute.path)) {
 			const file = path.replace(this.staticRoute.path, "");
-			const pathToFile = `${this.projectFolder}/${this.staticRoute.folder}/${file}`;
+			const pathToFile = `${this.staticRoute.folder}/${file}`;
 
 			if (existsSync(pathToFile) && statSync(pathToFile).isFile()) {
 				return new FileResponse()
