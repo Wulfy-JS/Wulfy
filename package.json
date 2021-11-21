@@ -23,7 +23,7 @@
     "nunjucks": "^3.2.3",
     "path-to-regexp": "^6.2.0",
     "sequelize": "^6.9.0",
-    "simcfg": "^1.0.1"
+    "simcfg": "^1.0.2"
   },
   "peerDependenciesMeta": {
     "pg": {
