@@ -62,14 +62,17 @@ abstract class Core {
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
 
 		//DataBase(Models)
-		let databaseConfig = this.config.get<Config | string>("database");
-		const url = databaseConfig instanceof Config ? databaseConfig.get("url") : databaseConfig;
-		const mode = databaseConfig instanceof Config ? databaseConfig.get("mode", "prod") : "prod";
+		let databaseConfig = this.config.get<DataBaseConfig | string>("database");
+		if (typeof databaseConfig == "string")
+			databaseConfig = { url: databaseConfig };
 
-		this._sequelize = new Sequelize(url);
+		if (!databaseConfig.mode)
+			databaseConfig.mode = "prod";
+
+		this._sequelize = new Sequelize(databaseConfig.url);
 		if (this.config.get("mode", "dev").toLowerCase() === "dev" &&
-			mode != "prod"
-		) this._sequelize.sync({ [mode]: true });
+			databaseConfig.mode != "prod"
+		) this._sequelize.sync({ [databaseConfig.mode]: true });
 		BaseModel.setup(this._sequelize);
 
 
