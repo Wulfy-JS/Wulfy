@@ -8,8 +8,10 @@ class RenderSevice extends BaseService {
 	constructor(config: Config, path?: string) {
 		super(config);
 		if (!path) path = config.get("views", "src/views");
+		const isDev = config.get("mode", "dev") === "dev";
 		this._e = new nunjucks.Environment(new nunjucks.FileSystemLoader(path), {
-			noCache: config.get("mode", "dev") === "dev"
+			watch: isDev,
+			noCache: isDev
 		});
 	}
 
