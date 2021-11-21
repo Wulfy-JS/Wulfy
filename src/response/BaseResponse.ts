@@ -1,5 +1,5 @@
 import { ServerResponse } from "http";
-import { Config } from "..";
+import Config from "simcfg";
 import SingleOrArr from "../utils/SingleOrROArr";
 
 type Header = number | SingleOrArr<string>;
