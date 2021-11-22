@@ -18,7 +18,7 @@ class RouteMap extends Map<RouteKey, RouteHandler> {
 			if (Array.isArray(key.method))
 				i = key.method.findIndex(e => e == "all" || e == method);
 			else
-				i = [key.method, "all"].indexOf(key.method);
+				i = [method, "all"].indexOf(key.method);
 
 			return i !== -1;
 		}
