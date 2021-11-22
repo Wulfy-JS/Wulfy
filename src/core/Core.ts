@@ -31,7 +31,7 @@ abstract class Core {
 	protected readonly routes = new RouteMap();
 	protected staticRoute: StaticRoute = {
 		path: "/",
-		folder: "/public"
+		folder: "public"
 	};
 
 
