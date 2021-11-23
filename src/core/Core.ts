@@ -2,9 +2,12 @@
 import { existsSync, statSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
 import { normalize } from "path";
-import Config from "simcfg";
+import simcfg from "simcfg";
 import sequelize from "sequelize";
 const { Sequelize } = sequelize;
+//@ts-ignore
+const Config: typeof simcfg = simcfg.default;
+type Config = simcfg;
 
 import FileResponse from "../response/FileResponse.js";
 import BaseResponse from "../response/BaseResponse.js";
