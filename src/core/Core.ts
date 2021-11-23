@@ -28,7 +28,7 @@ interface DataBaseConfig {
 }
 abstract class Core {
 	public readonly projectFolder = process.cwd();
-	protected readonly moduleFolder = normalize(import.meta.url.slice(8) + "/../../../");
+	protected readonly moduleFolder = normalize(import.meta.url.slice(7) + "/../../../");
 	public readonly config = new Config();
 
 	protected readonly routes = new RouteMap();
