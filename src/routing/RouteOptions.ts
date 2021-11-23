@@ -5,7 +5,7 @@ import PTR from "path-to-regexp";
 interface RouteOptions<T = RegExp> {
 	name: string,
 	path: T,
-	method?: SingleOrArr<RouteMethod>,
+	method?: SingleOrArr<RouteMethod> | "all",
 }
 
 

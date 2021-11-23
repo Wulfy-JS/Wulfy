@@ -16,7 +16,7 @@ class RouteMap extends Map<RouteKey, RouteHandler> {
 
 			let i = -1;
 			if (Array.isArray(key.method))
-				i = key.method.findIndex(e => e == "all" || e == method);
+				i = key.method.findIndex(e => e == method);
 			else
 				i = [method, "all"].indexOf(key.method);
 
