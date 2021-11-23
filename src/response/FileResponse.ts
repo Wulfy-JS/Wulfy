@@ -6,11 +6,14 @@ import mime from "mime";
 
 class FileResponse extends BaseResponse<Readable> {
 	private _mime: string = "text/plain";
-	private _encoding: BufferEncoding = "utf-8";
+	private _encoding: BufferEncoding = null;
 
 	protected __response(res: ServerResponse) {
 		const content = this.getContent();
-		res.setHeader("content-type", `${this._mime}; charset=${this._encoding}`)
+		let type = `${this._mime}`;
+		if (this._encoding)
+			type += `; charset=${this._encoding}`;
+		res.setHeader("content-type", type)
 		if (content) content.pipe(res);
 		else res.end();
 	}
@@ -30,7 +33,7 @@ class FileResponse extends BaseResponse<Readable> {
 		return this._encoding;
 	}
 
-	public setFile(path: string, encoding: BufferEncoding = "utf-8") {
+	public setFile(path: string, encoding: BufferEncoding = null) {
 		return this.setMime(mime.getType(path))
 			.setEncoding(encoding)
 			.setContent(createReadStream(path, { encoding }));
