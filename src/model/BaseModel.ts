@@ -55,8 +55,10 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	}
 
 	private static _init() {
-		if (this._setupData.init)
+		if (this._setupData.init) {
 			Model.init.bind(this)(this._setupData.init.attributes, { ...this._setupData.init.options, sequelize: this._sequelize });
+			this._setupData.init = null;
+		}
 	}
 
 	public static belongsTo<M extends Model, T extends Model>(
@@ -74,8 +76,11 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return
 	}
 	private static _belongsTo() {
-		if (this._setupData.belongsTo)
-			return Model.belongsTo.bind(this)(this._setupData.belongsTo.target, this._setupData.belongsTo.options);
+		if (this._setupData.belongsTo) {
+			const r = Model.belongsTo.bind(this)(this._setupData.belongsTo.target, this._setupData.belongsTo.options);
+			this._setupData.belongsTo = null;
+			return r;
+		}
 	}
 
 
@@ -95,13 +100,12 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	}
 
 	private static _belongsToMany() {
-		if (this._setupData.belongsToMany)
-			return Model.belongsToMany.bind(this)(this._setupData.belongsToMany.target, this._setupData.belongsToMany.options);
+		if (this._setupData.belongsToMany) {
+			const r = Model.belongsToMany.bind(this)(this._setupData.belongsToMany.target, this._setupData.belongsToMany.options);
+			this._setupData.belongsToMany = null;
+			return r;
+		}
 	}
-
-	//hasMany
-	//hasOne
-	//belongsToMany
 
 	public static hasOne<M extends Model, T extends Model>(
 		this: ModelStatic<M>, target: ModelStatic<T>, options?: HasOneOptions
@@ -118,8 +122,11 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return
 	}
 	private static _hasOne() {
-		if (this._setupData.hasOne)
-			return Model.hasOne.bind(this)(this._setupData.hasOne.target, this._setupData.hasOne.options);
+		if (this._setupData.hasOne) {
+			const r = Model.hasOne.bind(this)(this._setupData.hasOne.target, this._setupData.hasOne.options);
+			this._setupData.hasOne = null;
+			return r;
+		}
 	}
 	public static hasMany<M extends Model, T extends Model>(
 		this: ModelStatic<M>, target: ModelStatic<T>, options?: HasManyOptions
@@ -136,8 +143,11 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return
 	}
 	private static _hasMany() {
-		if (this._setupData.hasMany)
-			return Model.hasMany.bind(this)(this._setupData.hasMany.target, this._setupData.hasMany.options);
+		if (this._setupData.hasMany) {
+			const r = Model.hasMany.bind(this)(this._setupData.hasMany.target, this._setupData.hasMany.options);
+			this._setupData.hasMany = null;
+			return r;
+		}
 	}
 
 
