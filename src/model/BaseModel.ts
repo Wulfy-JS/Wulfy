@@ -34,7 +34,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	extends Model<TModelAttributes, TCreationAttributes>
 {
 	private static _sequelize: Sequelize;
-	private static _setupData: SetupData = {};
+	private static _setupData: SetupData;
 	private static models: Set<typeof BaseModel> = new Set();
 
 	public static init<MS extends ModelStatic<BaseModel>, M extends InstanceType<MS>>(
@@ -44,6 +44,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	public static init<MS extends ModelStatic<BaseModel>, M extends InstanceType<MS>>(
 		attributes: ModelAttributes<M, M['_attributes']>, options: Partial<InitOptions<M>> = {}
 	) {
+		this._setupData = {};
 		this._setupData.init = { attributes, options };
 
 		if (this._sequelize)
