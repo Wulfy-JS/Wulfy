@@ -72,7 +72,9 @@ abstract class Core {
 		if (!databaseConfig.mode)
 			databaseConfig.mode = "prod";
 
-		this._sequelize = new Sequelize(databaseConfig.url);
+		this._sequelize = new Sequelize(databaseConfig.url, {
+			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+		});
 		if (this.config.get("mode", "dev").toLowerCase() === "dev" &&
 			databaseConfig.mode != "prod"
 		) this._sequelize.sync({ [databaseConfig.mode]: true });
