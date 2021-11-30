@@ -5,7 +5,7 @@ import Response from "./response/Response.js";
 import JsonResponse from "./response/JsonResponse.js";
 import FileResponse from "./response/FileResponse.js";
 import RenderSevice from "./services/RenderService.js";
-import BaseModel from "./model/BaseModel.js";
+import BaseModel, { StaticBaseModel } from "./model/BaseModel.js";
 
 
 export default Core;
@@ -21,5 +21,6 @@ export {
 	JsonResponse,
 	FileResponse,
 
-	BaseModel
+	BaseModel,
+	StaticBaseModel
 };
