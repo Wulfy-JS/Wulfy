@@ -5,6 +5,7 @@ import BaseService from "./BaseService.js";
 
 class RenderSevice extends BaseService {
 	private _e: nunjucks.Environment;
+
 	constructor(config: Config, path?: string) {
 		super(config);
 		if (!path) path = config.get("views", "src/views");
@@ -13,6 +14,19 @@ class RenderSevice extends BaseService {
 			watch: isDev,
 			noCache: isDev
 		}));
+		for (const key in RenderSevice.globals) {
+			this._e.addGlobal(key, RenderSevice.globals[key]);
+		}
+	}
+
+	private static globals: NodeJS.Dict<any> = {};
+	public static addGlobal(key: string, value: any): typeof RenderSevice {
+		this.globals[key] = value;
+		return this;
+	}
+	public addGlobal(key: string, value: any): this {
+		this._e.addGlobal(key, value);
+		return this;
 	}
 
 	public render(file: string, params: NodeJS.Dict<any> = {}, charset: BufferEncoding = "utf-8") {
