@@ -1,13 +1,13 @@
-import sequelize, { ModelStatic, ModelCtor, ModelAttributes, InitOptions, Sequelize, BelongsToOptions, BelongsToManyOptions, HasOneOptions, HasManyOptions } from "sequelize";
-const Model = sequelize.Model;
-type Model<A extends {} = any, B extends {} = A> = sequelize.Model<A, B>;
-type BelongsTo<S extends Model = Model, T extends Model = Model> = sequelize.BelongsTo<S, T>;
-type BelongsToMany<S extends Model = Model, T extends Model = Model> = sequelize.BelongsToMany<S, T>;
-type HasOne<S extends Model = Model, T extends Model = Model> = sequelize.HasOne<S, T>;
-type HasMany<S extends Model = Model, T extends Model = Model> = sequelize.HasMany<S, T>;
+import s, { ModelStatic, ModelCtor, ModelAttributes, InitOptions, Sequelize, BelongsToOptions, BelongsToManyOptions, HasOneOptions, HasManyOptions } from "sequelize";
+const { Model } = s;
+// type Model<A extends {} = any, B extends {} = A> = sequelize.Model<A, B>;
+type BelongsTo<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.BelongsTo<S, T>;
+type BelongsToMany<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.BelongsToMany<S, T>;
+type HasOne<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.HasOne<S, T>;
+type HasMany<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.HasMany<S, T>;
 
 
-interface SetupData<T extends Model<any, any> = any> {
+interface SetupData<T extends s.Model<any, any> = any> {
 	init?: {
 		attributes: ModelAttributes;
 		options: Partial<InitOptions>;
@@ -31,7 +31,7 @@ interface SetupData<T extends Model<any, any> = any> {
 }
 
 abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes extends {} = TModelAttributes>
-	extends Model<TModelAttributes, TCreationAttributes>
+	extends s.Model<TModelAttributes, TCreationAttributes>
 {
 	private static _sequelize: Sequelize;
 	private static _setupData: SetupData;
@@ -62,10 +62,11 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		}
 	}
 
-	public static belongsTo<M extends Model, T extends Model>(
-		this: ModelStatic<M>, target: ModelStatic<T>, options?: BelongsToOptions
+	public static belongsTo<M extends s.Model, T extends s.Model>(
+		// this: ModelStatic<M>, 
+		target: ModelStatic<T>, options?: BelongsToOptions
 	): BelongsTo<M, T>;
-	public static belongsTo<M extends Model, T extends Model>(
+	public static belongsTo<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options?: BelongsToOptions
 	): BelongsTo<M, T> {
 		this._setupData.belongsTo = { target, options };
@@ -85,10 +86,10 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	}
 
 
-	public static belongsToMany<M extends Model, T extends Model>(
+	public static belongsToMany<M extends s.Model, T extends s.Model>(
 		this: ModelStatic<M>, target: ModelStatic<T>, options: BelongsToManyOptions
 	): BelongsToMany<M, T>;
-	public static belongsToMany<M extends Model, T extends Model>(
+	public static belongsToMany<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options: BelongsToManyOptions
 	): BelongsToMany<M, T> {
 		this._setupData.belongsToMany = { target, options };
@@ -107,10 +108,10 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		}
 	}
 
-	public static hasOne<M extends Model, T extends Model>(
+	public static hasOne<M extends s.Model, T extends s.Model>(
 		this: ModelStatic<M>, target: ModelStatic<T>, options?: HasOneOptions
 	): HasOne<M, T>;
-	public static hasOne<M extends Model, T extends Model>(
+	public static hasOne<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options?: HasOneOptions
 	): HasOne<M, T> {
 		this._setupData.hasOne = { target, options };
@@ -129,10 +130,10 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		}
 	}
 
-	public static hasMany<M extends Model, T extends Model>(
+	public static hasMany<M extends s.Model, T extends s.Model>(
 		this: ModelStatic<M>, target: ModelStatic<T>, options?: HasManyOptions
 	): HasMany<M, T>;
-	public static hasMany<M extends Model, T extends Model>(
+	public static hasMany<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options?: HasManyOptions
 	): HasMany<M, T> {
 		this._setupData.hasMany = { target, options };
@@ -155,11 +156,11 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 
 	public static setup(sequelize: Sequelize) {
 		this._sequelize = sequelize;
+		this.models.forEach(e => e._init());
 		this.models.forEach(e => e._setup());
 	}
 
 	private static _setup() {
-		this._init();
 		this._hasOne();
 		this._hasMany();
 		this._belongsTo();
@@ -168,7 +169,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 }
 
 
-interface StaticBaseModel<T extends Model> extends ModelCtor<T> {
+interface StaticBaseModel<T extends s.Model> extends ModelCtor<T> {
 	new(): T;
 }
 export default BaseModel;
