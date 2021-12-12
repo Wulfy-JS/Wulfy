@@ -17,6 +17,7 @@ class RenderSevice extends BaseService {
 		for (const key in RenderSevice.globals) {
 			this._e.addGlobal(key, RenderSevice.globals[key]);
 		}
+		this._e.addGlobal("dev", isDev);
 	}
 
 	private static globals: NodeJS.Dict<any> = {};

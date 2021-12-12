@@ -47,11 +47,7 @@ abstract class Core {
 	public get services(): ListServices {
 		return <ListServices>Object.assign({}, this.serviceList);
 	}
-	protected localRenderService = (() => {
-		const service = new RenderSevice(this.config, this.moduleFolder + "/views/");
-		service.addGlobal("dev", this.config.get("mode", "dev").toLowerCase() == "dev");
-		return service;
-	})();
+	protected localRenderService;
 
 	private __inited = false;
 	protected __init(): void { };
@@ -64,6 +60,7 @@ abstract class Core {
 
 		//Services
 		this.serviceList.RenderService = new RenderSevice(this.config);
+		this.localRenderService = new RenderSevice(this.config, this.moduleFolder + "/views/");
 
 		//Routes
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
@@ -139,9 +136,6 @@ abstract class Core {
 					error: new ReferenceError(`Route "${req.method.toUpperCase()}: ${path}" not found.`)
 				})
 				.setStatus(404);
-			// Response()
-			// 	.setStatus(404)
-			// 	.setContent(`Route "${req.method.toUpperCase()}: ${path}" not found.`);
 		}
 		const [route, key, matches] = value;
 		const dictArgs: NodeJS.Dict<string> = {};
