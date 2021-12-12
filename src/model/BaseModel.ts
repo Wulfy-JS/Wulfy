@@ -63,7 +63,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	}
 
 	public static belongsTo<M extends s.Model, T extends s.Model>(
-		// this: ModelStatic<M>, 
+		this: ModelStatic<M>,
 		target: ModelStatic<T>, options?: BelongsToOptions
 	): BelongsTo<M, T>;
 	public static belongsTo<M extends s.Model, T extends s.Model>(
@@ -151,7 +151,6 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 			return r;
 		}
 	}
-
 
 
 	public static setup(sequelize: Sequelize) {

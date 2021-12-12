@@ -47,7 +47,11 @@ abstract class Core {
 	public get services(): ListServices {
 		return <ListServices>Object.assign({}, this.serviceList);
 	}
-	protected localRenderService = new RenderSevice(this.config, this.moduleFolder + "/views/");
+	protected localRenderService = (() => {
+		const service = new RenderSevice(this.config, this.moduleFolder + "/views/");
+		service.addGlobal("dev", this.config.get("mode", "dev").toLowerCase() == "dev");
+		return service;
+	})();
 
 	private __inited = false;
 	protected __init(): void { };
@@ -129,7 +133,11 @@ abstract class Core {
 		const value = this.routes.findRouteAndKeyByPath(path, req.method);
 		if (!value) {
 			return this.localRenderService
-				.render("error.njk", { code: 404, message: "The file was not found :(" })
+				.render("error.njk", {
+					code: 404,
+					message: "The file was not found :(",
+					error: new ReferenceError(`Route "${req.method.toUpperCase()}: ${path}" not found.`)
+				})
 				.setStatus(404);
 			// Response()
 			// 	.setStatus(404)
@@ -160,15 +168,16 @@ abstract class Core {
 				response = await response;
 
 			if (!(response instanceof BaseResponse)) {
-				return this.localRenderService
-					.render("error.njk", { code: 500, message: "Something happened and the app broke :(" })
-					.setStatus(500);
-				return new Response().setStatus(500).setContent(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
+				throw new ReferenceError(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
 			}
 			return response;
 		} catch (e) {
 			return this.localRenderService
-				.render("error.njk", { code: 500, message: "Something happened and the app broke :(" })
+				.render("error.njk", {
+					code: 500,
+					message: "Something happened and the app broke :(",
+					error: e
+				})
 				.setStatus(500);
 		}
 	}
