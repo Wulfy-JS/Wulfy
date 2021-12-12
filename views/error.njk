@@ -12,6 +12,7 @@
 			<h2>{{error.message}}</h2>
 			<div>{{error.stack.split('\n').slice(1).join('<br>') | safe}}</div>
 		{% else %}
+			<h1>Error {{code}}</h1>
 			<p>{{message}}</p>
 		{% endif %}
 	</body>
