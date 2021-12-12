@@ -2,13 +2,16 @@
 <html>
 	<head>
 		<title>Error {{code}}</title>
+		{% if not dev %}
 		<style>body{background: #f7f7f7;font-family:'Arial';margin:3.5em}body *{margin:0}h1{color: #d10000}p{font-weight: bold}</style>
-	</heda>
+		{% endif %}
+	</head>
 	<body>
 		{% if dev %}
-			Error {{code}}
-		{% else %}
 			<h1>Error {{code}}</h1>
+			<h2>{{error.message}}</h2>
+			<div>{{error.stack.split('\n').slice(1).join('<br>') | safe}}</div>
+		{% else %}
 			<p>{{message}}</p>
 		{% endif %}
 	</body>
