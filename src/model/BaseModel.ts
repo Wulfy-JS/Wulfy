@@ -15,19 +15,19 @@ interface SetupData<T extends s.Model<any, any> = any> {
 	belongsTo?: {
 		target: ModelStatic<T>;
 		options?: BelongsToOptions;
-	};
+	}[];
 	belongsToMany?: {
 		target: ModelStatic<T>;
 		options?: BelongsToManyOptions;
-	};
+	}[];
 	hasOne?: {
 		target: ModelStatic<T>;
 		options?: HasOneOptions;
-	};
+	}[];
 	hasMany?: {
 		target: ModelStatic<T>;
 		options?: HasManyOptions;
-	};
+	}[];
 }
 
 abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes extends {} = TModelAttributes>
@@ -44,8 +44,13 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	public static init<MS extends ModelStatic<BaseModel>, M extends InstanceType<MS>>(
 		attributes: ModelAttributes<M, M['_attributes']>, options: Partial<InitOptions<M>> = {}
 	) {
-		this._setupData = {};
-		this._setupData.init = { attributes, options };
+		this._setupData = {
+			init: { attributes, options },
+			belongsTo: [],
+			hasOne: [],
+			hasMany: [],
+			belongsToMany: []
+		};
 
 		if (this._sequelize)
 			this._init()
@@ -68,8 +73,8 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	): BelongsTo<M, T>;
 	public static belongsTo<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options?: BelongsToOptions
-	): BelongsTo<M, T> {
-		this._setupData.belongsTo = { target, options };
+	): BelongsTo<M, T> | void {
+		this._setupData.belongsTo.push({ target, options });
 
 		if (this._sequelize)
 			return this._belongsTo()
@@ -78,10 +83,9 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return
 	}
 	private static _belongsTo() {
-		if (this._setupData.belongsTo) {
-			const r = Model.belongsTo.bind(this)(this._setupData.belongsTo.target, this._setupData.belongsTo.options);
-			this._setupData.belongsTo = null;
-			return r;
+		let item;
+		while (item = this._setupData.belongsTo.shift()) {
+			Model.belongsTo.bind(this)(item.target, item.options);
 		}
 	}
 
@@ -91,8 +95,8 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	): BelongsToMany<M, T>;
 	public static belongsToMany<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options: BelongsToManyOptions
-	): BelongsToMany<M, T> {
-		this._setupData.belongsToMany = { target, options };
+	): BelongsToMany<M, T> | void {
+		this._setupData.belongsToMany.push({ target, options });
 
 		if (this._sequelize)
 			return this._belongsToMany()
@@ -101,10 +105,9 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return
 	}
 	private static _belongsToMany() {
-		if (this._setupData.belongsToMany) {
-			const r = Model.belongsToMany.bind(this)(this._setupData.belongsToMany.target, this._setupData.belongsToMany.options);
-			this._setupData.belongsToMany = null;
-			return r;
+		let item;
+		while (item = this._setupData.belongsToMany.shift()) {
+			Model.belongsToMany.bind(this)(item.target, item.options);
 		}
 	}
 
@@ -113,8 +116,8 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	): HasOne<M, T>;
 	public static hasOne<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options?: HasOneOptions
-	): HasOne<M, T> {
-		this._setupData.hasOne = { target, options };
+	): HasOne<M, T> | void {
+		this._setupData.hasOne.push({ target, options });
 
 		if (this._sequelize)
 			return this._hasOne()
@@ -123,10 +126,9 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return
 	}
 	private static _hasOne() {
-		if (this._setupData.hasOne) {
-			const r = Model.hasOne.bind(this)(this._setupData.hasOne.target, this._setupData.hasOne.options);
-			this._setupData.hasOne = null;
-			return r;
+		let item;
+		while (item = this._setupData.hasOne.shift()) {
+			Model.hasOne.bind(this)(item.target, item.options);
 		}
 	}
 
@@ -135,8 +137,8 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 	): HasMany<M, T>;
 	public static hasMany<M extends s.Model, T extends s.Model>(
 		target: ModelStatic<T>, options?: HasManyOptions
-	): HasMany<M, T> {
-		this._setupData.hasMany = { target, options };
+	): HasMany<M, T> | void {
+		this._setupData.hasMany.push({ target, options });
 
 		if (this._sequelize)
 			return this._hasMany()
@@ -145,10 +147,9 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		return
 	}
 	private static _hasMany() {
-		if (this._setupData.hasMany) {
-			const r = Model.hasMany.bind(this)(this._setupData.hasMany.target, this._setupData.hasMany.options);
-			this._setupData.hasMany = null;
-			return r;
+		let item;
+		while (item = this._setupData.hasMany.shift()) {
+			Model.hasMany.bind(this)(item.target, item.options);
 		}
 	}
 
