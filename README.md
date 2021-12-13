@@ -1,5 +1,5 @@
-# Red-Project
+# Wulfy
 
-[HttpCore](https://github.com/80LK/Red-Project-HttpCore)
+[HTTP-Core](https://github.com/Wulfy-JS/Wulfy-HTTP-Core)
 
-[Example Red-Project](https://github.com/80LK/Red-Project-Example)
+[TypeScript Example](https://github.com/Wulfy-JS/TypeScript-Example)
