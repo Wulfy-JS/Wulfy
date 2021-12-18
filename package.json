@@ -5,6 +5,7 @@
   "repository": "https://github.com/Wulfy-JS/Wulfy",
   "main": "dist/index.js",
   "type": "module",
+  "types": "types/index.d.ts",
   "scripts": {
     "build": "./node_modules/.bin/tsc -p tsconfig.json",
     "watch": "./node_modules/.bin/tsc -p tsconfig.json --watch",

@@ -1,2 +1,5 @@
 src
 tsconfig.json
+
+dist/test
+types/test
