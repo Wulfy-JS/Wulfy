@@ -6,12 +6,13 @@ import JsonResponse from "./response/JsonResponse.js";
 import FileResponse from "./response/FileResponse.js";
 import RenderSevice from "./services/RenderService.js";
 import BaseModel, { StaticBaseModel } from "./model/BaseModel.js";
-
+import Route from "./routing/Route.js";
 
 export default Core;
 
 export {
 	RoutingConfigurator,
+	Route,
 
 	BaseController,
 

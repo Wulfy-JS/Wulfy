@@ -1,6 +1,5 @@
 import { IncomingMessage } from "http";
 import { FileResponse } from "../index.js";
-import RenderSevice from "../services/RenderService.js";
 import BaseResponse, { HeaderDict } from "../response/BaseResponse.js";
 import JsonResponse from "../response/JsonResponse.js";
 import Response from "../response/Response.js";

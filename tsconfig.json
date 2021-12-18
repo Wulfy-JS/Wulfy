@@ -5,6 +5,7 @@
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
 		"declaration": true,
+		"declarationDir": "types",
 		"lib": ["ES2020"],
 		"outDir": "dist",
 		"target": "ES2020",

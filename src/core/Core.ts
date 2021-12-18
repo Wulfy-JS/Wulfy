@@ -11,14 +11,12 @@ type Config = simcfg;
 
 import FileResponse from "../response/FileResponse.js";
 import BaseResponse from "../response/BaseResponse.js";
-import Response from "../response/Response.js";
 import RouteMap from "../routing/RouteMap.js";
 import RoutingConfigurator from "../routing/RoutingConfigurator.js";
 import StaticRoute from "../routing/StaticRoute.js";
 import BaseModel from "../model/BaseModel.js"
 import ListServices from "../services/ListServices.js";
-import RenderSevice from "../services/RenderService.js";
-// import "../services/RenderService.js";
+import RenderService from "../services/RenderService.js";
 import final from "../utils/final.js";
 
 
@@ -47,7 +45,7 @@ abstract class Core {
 	public get services(): ListServices {
 		return <ListServices>Object.assign({}, this.serviceList);
 	}
-	protected localRenderService;
+	protected localRenderService: RenderService;
 
 	private __inited = false;
 	protected __init(): void { };
@@ -59,28 +57,31 @@ abstract class Core {
 		this.configure(this.config);
 
 		//Services
-		this.serviceList.RenderService = new RenderSevice(this.config);
-		this.localRenderService = new RenderSevice(this.config, this.moduleFolder + "/views/");
+		this.serviceList.RenderService = new RenderService(this.config);
+		this.localRenderService = new RenderService(this.config, this.moduleFolder + "/views/");
 
 		//Routes
 		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
 
 		//DataBase(Models)
-		let databaseConfig = this.config.get<DataBaseConfig | string>("database");
-		if (typeof databaseConfig == "string")
-			databaseConfig = { url: databaseConfig };
+		let databaseConfig = this.config.get<DataBaseConfig | string>("database", null);
+		if (databaseConfig) {
+			if (typeof databaseConfig == "string")
+				databaseConfig = { url: databaseConfig };
 
-		if (!databaseConfig.mode)
-			databaseConfig.mode = "prod";
+			if (!databaseConfig.mode)
+				databaseConfig.mode = "prod";
 
-		this._sequelize = new Sequelize(databaseConfig.url, {
-			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-		});
-		if (this.config.get("mode", "dev").toLowerCase() === "dev" &&
-			databaseConfig.mode != "prod"
-		) this._sequelize.sync({ [databaseConfig.mode]: true });
-		BaseModel.setup(this._sequelize);
-
+			this._sequelize = new Sequelize(databaseConfig.url, {
+				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+			});
+			if (this.config.get("mode", "dev").toLowerCase() === "dev" &&
+				databaseConfig.mode != "prod"
+			) this._sequelize.sync({ [databaseConfig.mode]: true });
+			BaseModel.setup(this._sequelize);
+		} else {
+			console.warn("No configuration for database! Models not works!");
+		}
 
 		//Core
 		this.__init();
