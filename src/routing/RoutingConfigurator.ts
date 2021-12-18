@@ -89,7 +89,7 @@ class RoutingConfigurator {
 			const routeDesc = RouteSettings[key];
 
 			this.routes.set({
-				path: rootPath + (routeDesc.path || ""),
+				path: (routeDesc.path instanceof RegExp) ? routeDesc.path : rootPath + (routeDesc.path || ""),
 				name: routeDesc.name,
 				method: routeDesc.method || "all"
 			}, {
