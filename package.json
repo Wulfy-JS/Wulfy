@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
     "start": "node --es-module-specifier-resolution=node dist/index.js",
-    "test": "node --es-module-specifier-resolution=node dist/test/index.js"
+    "test": "nodemon --es-module-specifier-resolution=node dist/test/index.js"
   },
   "author": "80LK",
   "license": "MIT",
@@ -19,6 +19,8 @@
     "@types/node": "^16.11.6",
     "@types/nunjucks": "^3.2.0",
     "chokidar": "^3.5.2",
+    "nodemon": "^2.0.15",
+    "ts-cleaner": "^1.0.5",
     "typescript": "^4.4.4",
     "wulfy-http-core": "^0.1.2"
   },

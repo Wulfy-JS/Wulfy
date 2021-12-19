@@ -29,8 +29,12 @@ abstract class Core {
 	protected readonly moduleFolder = normalize(import.meta.url.slice(process.platform == "win32" ? 8 : 7) + "/../../../");
 	public readonly config = new Config();
 
+	public get isDev() {
+		return this.config.get("mode", "dev").toLowerCase() === "dev";
+	}
+
 	protected readonly routes = new RouteMap();
-	protected staticRoute: StaticRoute = {
+	protected readonly staticRoute: StaticRoute = {
 		path: "/",
 		folder: "public"
 	};
@@ -61,7 +65,7 @@ abstract class Core {
 		this.localRenderService = new RenderService(this.config, this.moduleFolder + "/views/");
 
 		//Routes
-		this.configureRoutes(new RoutingConfigurator(this.routes, this.staticRoute, this.projectFolder));
+		this.configureRoutes(new RoutingConfigurator(this, this.routes, this.staticRoute, this.projectFolder));
 
 		//DataBase(Models)
 		let databaseConfig = this.config.get<DataBaseConfig | string>("database", null);
@@ -75,9 +79,8 @@ abstract class Core {
 			this._sequelize = new Sequelize(databaseConfig.url, {
 				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
 			});
-			if (this.config.get("mode", "dev").toLowerCase() === "dev" &&
-				databaseConfig.mode != "prod"
-			) this._sequelize.sync({ [databaseConfig.mode]: true });
+			if (this.isDev && databaseConfig.mode != "prod")
+				this._sequelize.sync({ [databaseConfig.mode]: true });
 			BaseModel.setup(this._sequelize);
 		} else {
 			console.warn("No configuration for database! Models not works!");

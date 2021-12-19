@@ -14,7 +14,7 @@ class HttpCore extends Core {
 	private server: Server;
 
 	protected __init() {
-		this.port = 80;
+		this.port = 8080;
 		this.server = createServer();
 		this.server.on("request", (req, res) => {
 			req.body = "";
