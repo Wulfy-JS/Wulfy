@@ -1,5 +1,5 @@
 import { IncomingMessage } from "http";
-import { BaseController, Route } from "../..";
+import { BaseController, Route } from "../../..";
 
 class TestController extends BaseController {
 	protected index(params: NodeJS.Dict<string>, request: IncomingMessage) {

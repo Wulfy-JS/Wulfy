@@ -39,12 +39,12 @@ class RoutingConfigurator {
 
 
 		const pathes = (await readdir(path)).map(file => path + "/" + file);
-		for (const pathToontroller of pathes) {
-			const file = await stat(pathToontroller);
+		for (const pathToController of pathes) {
+			const file = await stat(pathToController);
 			if (file.isDirectory()) {
-				arr = arr.concat(await this.loadControllersFromDirectory(path, deep - 1));
+				arr = arr.concat(await this.loadControllersFromDirectory(pathToController, deep - 1));
 			} else if (file.isFile()) {
-				arr.push(await this.loadControllerFromFile(pathToontroller));
+				arr.push(await this.loadControllerFromFile(pathToController));
 			}
 		}
 		return arr;
