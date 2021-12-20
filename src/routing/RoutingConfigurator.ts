@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { readdir, stat } from "fs/promises";
 import { BaseControllerConstructor } from "../controller/BaseController.js";
 import Core from "../index.js";
@@ -34,24 +35,35 @@ class RoutingConfigurator {
 	}
 
 	private async loadControllersFromDirectory(path: string, deep: number = 4) {
-		let arr: BaseControllerConstructor[] = [];
-		if (deep == 0) return arr;
+		if (deep == 0) return;
 
 
 		const pathes = (await readdir(path)).map(file => path + "/" + file);
 		for (const pathToController of pathes) {
 			const file = await stat(pathToController);
 			if (file.isDirectory()) {
-				arr = arr.concat(await this.loadControllersFromDirectory(pathToController, deep - 1));
+				this.loadControllersFromDirectory(pathToController, deep - 1);
 			} else if (file.isFile()) {
-				arr.push(await this.loadControllerFromFile(pathToController));
+				await this.loadControllerFromFile(pathToController)
 			}
 		}
-		return arr;
 	}
+	private controllers: NodeJS.Dict<BaseControllerConstructor> = {};
+	private async loadControllerFromFile(path: string) {
+		let controller: BaseControllerConstructor = (await import(path + "?" + Date.now())).default;
+		if (!controller) return;
+		this.registerRoutesFromController(controller);
 
-	private async loadControllerFromFile(path: string): Promise<BaseControllerConstructor> {
-		return (await import("file://" + path)).default;
+		if (this.core.isDev) {
+			this.controllers[resolve(path)] = controller;
+		}
+	}
+	private unloadControllerFromFile(path: string) {
+		let controller = this.controllers[path];
+		if (!controller) return;
+		this.unregisterRoutesFromController(controller);
+
+		delete this.controllers[resolve(path)];
 	}
 
 	private registerRoutesFromController(controller: BaseControllerConstructor) {
@@ -74,6 +86,17 @@ class RoutingConfigurator {
 			});
 		}
 	}
+	private unregisterRoutesFromController(controller: BaseControllerConstructor) {
+		const RouteSettings = controller.prototype[ROUTE_ATTRIBUTES];
+		if (!RouteSettings) return;
+
+		for (const key in RouteSettings) {
+			if (key == ROOT_ATTRIBUTES) continue;
+			const routeDesc = RouteSettings[key];
+
+			this.routes.deleteByName(routeDesc.name);
+		}
+	}
 
 	public loadControllers(paths: string | string[], deep: number = 4) {
 		if (!Array.isArray(paths))
@@ -82,14 +105,23 @@ class RoutingConfigurator {
 		return Promise.all(paths.map(path => this.root + "/" + path).map(async path => {
 			const file = await stat(path)
 			if (file.isDirectory()) {
-				const controllers = await this.loadControllersFromDirectory(path, deep);
-				for (const controller of controllers)
-					this.registerRoutesFromController(controller)
+				await this.loadControllersFromDirectory(path, deep);
 			} else if (file.isFile()) {
-				const controller = await this.loadControllerFromFile(path);
-				this.registerRoutesFromController(controller)
+				await this.loadControllerFromFile(path);
 			} else {
 				console.warn(`Can't load path ${path}`);
+				return;
+			}
+
+			if (this.core.isDev) {
+				const chokidar = await import("chokidar");
+				chokidar.watch(path, { ignoreInitial: true })
+					.on("change", path => {
+						this.unloadControllerFromFile(path);
+						this.loadControllerFromFile(path);
+					})
+					.on('add', path => this.loadControllerFromFile(path))
+					.on('unlink', path => this.unloadControllerFromFile(path));
 			}
 		}));
 	}

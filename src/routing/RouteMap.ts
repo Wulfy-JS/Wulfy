@@ -40,6 +40,12 @@ class RouteMap extends Map<RouteKey, RouteHandler> {
 		return this;
 	}
 
+	public deleteByName(name: string) {
+		const key = this.findKeyByName(name);
+		if (key)
+			this.delete(key);
+	}
+
 
 
 	public findKey(callback: (key: RouteOptions) => boolean): RouteKey | false {
