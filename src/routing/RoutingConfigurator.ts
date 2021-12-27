@@ -105,8 +105,7 @@ class RoutingConfigurator {
 		if (!module)
 			throw new ReferenceError(`Can't laod module "${name}"`);
 
-		const path = normilize(module);
-
+		// const path = normilize(module);
 		let controller: BaseControllerConstructor = (await import(name)).default;
 		if (!controller) return;
 		this.registerRoutesFromController(controller);
@@ -120,7 +119,8 @@ class RoutingConfigurator {
 			paths.map(async path => {
 				if (path[0] != ".")
 					return await this.loadControllersFromModule(path);
-
+				else
+					path = normilize(this.root + "/" + path);
 
 				const file = await stat(path)
 				if (file.isDirectory()) {
