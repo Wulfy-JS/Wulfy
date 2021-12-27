@@ -99,22 +99,28 @@ class RoutingConfigurator {
 		}
 	}
 
+	private async loadControllersFromModule(name: string) {
+		const module = await import.meta.resolve(name);
+
+		if (!module)
+			throw new ReferenceError(`Can't laod module "${name}"`);
+
+		const path = normilize(module);
+
+		let controller: BaseControllerConstructor = (await import(name)).default;
+		if (!controller) return;
+		this.registerRoutesFromController(controller);
+	}
+
 	public loadControllers(paths: string | string[], deep: number = 4) {
 		if (!Array.isArray(paths))
 			paths = [paths];
 
 		return Promise.all(
 			paths.map(async path => {
-				if (path[0] == ".")
-					return normilize(this.root + "/" + path);
-				const module = await import.meta.resolve(path);
+				if (path[0] != ".")
+					return await this.loadControllersFromModule(path);
 
-				if (!module)
-					throw new ReferenceError(`Can't laod module "${path}"`);
-
-				return normilize(module);
-			}).map(async _path => {
-				const path = await _path;
 
 				const file = await stat(path)
 				if (file.isDirectory()) {
