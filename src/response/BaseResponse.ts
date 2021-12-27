@@ -58,6 +58,10 @@ abstract class BaseResponse<T = any> {
 		this.__response(res, config);
 	}
 
+
+	public static isResponse(obj: any): obj is BaseResponse {
+		return typeof obj.status === "number" && obj.headers;
+	}
 }
 
 export default BaseResponse;

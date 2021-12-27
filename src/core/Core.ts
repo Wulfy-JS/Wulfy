@@ -165,7 +165,7 @@ abstract class Core {
 			if (response instanceof Promise)
 				response = await response;
 
-			if (!(response instanceof BaseResponse)) {
+			if (!BaseResponse.isResponse(response)) {
 				throw new ReferenceError(`Controller "${route.controller.name}.${route.handler}" return not Response.`);
 			}
 			return response;
