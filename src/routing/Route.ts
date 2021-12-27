@@ -41,12 +41,16 @@ function Route(routeDescription: unknown) {
 		return function (constructor: BaseControllerConstructor) {
 			const target = constructor.prototype;
 			if (!target[ROUTE_ATTRIBUTES]) target[ROUTE_ATTRIBUTES] = {};
+			else target[ROUTE_ATTRIBUTES] = Object.assign({}, target[ROUTE_ATTRIBUTES]);
+
 			target[ROUTE_ATTRIBUTES][ROOT_ATTRIBUTES] = routeDescription;
 		};
 
 	if (isRouteOptions(routeDescription))
 		return function (target: BaseController, propertyKey: string, descriptor: PropertyDescriptor) {
 			if (!target[ROUTE_ATTRIBUTES]) target[ROUTE_ATTRIBUTES] = {};
+			else target[ROUTE_ATTRIBUTES] = Object.assign({}, target[ROUTE_ATTRIBUTES]);
+
 			target[ROUTE_ATTRIBUTES][propertyKey] = routeDescription;
 		};
 
