@@ -1,5 +1,5 @@
 import { resolve } from "path";
-import { readdir, stat } from "fs/promises";
+import { readdir, readFile, stat } from "fs/promises";
 import { BaseControllerConstructor } from "../controller/BaseController.js";
 import Core from "../index.js";
 import { ROOT_ATTRIBUTES, ROUTE_ATTRIBUTES } from "./Route.js";
@@ -7,6 +7,7 @@ import RouteHandler from "./RouteHandler.js";
 import RouteMap from "./RouteMap.js";
 import RouteOptions from "./RouteOptions.js";
 import StaticRoute from "./StaticRoute.js";
+import normilize from "../utils/normilize.js";
 
 export type Route = RouteOptions<string | RegExp> & RouteHandler;
 
@@ -102,28 +103,40 @@ class RoutingConfigurator {
 		if (!Array.isArray(paths))
 			paths = [paths];
 
-		return Promise.all(paths.map(path => this.root + "/" + path).map(async path => {
-			const file = await stat(path)
-			if (file.isDirectory()) {
-				await this.loadControllersFromDirectory(path, deep);
-			} else if (file.isFile()) {
-				await this.loadControllerFromFile(path);
-			} else {
-				console.warn(`Can't load path ${path}`);
-				return;
-			}
+		return Promise.all(
+			paths.map(async path => {
+				if (path[0] == ".")
+					return normilize(this.root + "/" + path);
+				const module = await import.meta.resolve(path);
 
-			if (this.core.isDev) {
-				const chokidar = await import("chokidar");
-				chokidar.watch(path, { ignoreInitial: true })
-					.on("change", path => {
-						this.unloadControllerFromFile(path);
-						this.loadControllerFromFile(path);
-					})
-					.on('add', path => this.loadControllerFromFile(path))
-					.on('unlink', path => this.unloadControllerFromFile(path));
-			}
-		}));
+				if (!module)
+					throw new ReferenceError(`Can't laod module "${path}"`);
+
+				return normilize(module);
+			}).map(async _path => {
+				const path = await _path;
+
+				const file = await stat(path)
+				if (file.isDirectory()) {
+					await this.loadControllersFromDirectory(path, deep);
+				} else if (file.isFile()) {
+					await this.loadControllerFromFile(path);
+				} else {
+					console.warn(`Can't load path ${path}`);
+					return;
+				}
+
+				if (this.core.isDev) {
+					const chokidar = await import("chokidar");
+					chokidar.watch(path, { ignoreInitial: true })
+						.on("change", path => {
+							this.unloadControllerFromFile(path);
+							this.loadControllerFromFile(path);
+						})
+						.on('add', path => this.loadControllerFromFile(path))
+						.on('unlink', path => this.unloadControllerFromFile(path));
+				}
+			}));
 	}
 }
 

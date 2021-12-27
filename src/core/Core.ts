@@ -1,7 +1,7 @@
 
 import { existsSync, statSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
-import { normalize } from "path";
+import normalize from "../utils/normilize";
 import simcfg from "simcfg";
 import sequelize from "sequelize";
 const { Sequelize } = sequelize;
@@ -26,7 +26,7 @@ interface DataBaseConfig {
 }
 abstract class Core {
 	public readonly projectFolder = process.cwd();
-	protected readonly moduleFolder = normalize(import.meta.url.slice(process.platform == "win32" ? 8 : 7) + "/../../../");
+	protected readonly moduleFolder = normalize(import.meta.url + "/../../../");
 	public readonly config = new Config();
 
 	public get isDev() {
