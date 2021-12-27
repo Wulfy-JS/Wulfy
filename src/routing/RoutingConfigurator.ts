@@ -1,5 +1,5 @@
 import { resolve } from "path";
-import { readdir, readFile, stat } from "fs/promises";
+import { readdir, stat } from "fs/promises";
 import { BaseControllerConstructor } from "../controller/BaseController.js";
 import Core from "../index.js";
 import { ROOT_ATTRIBUTES, ROUTE_ATTRIBUTES } from "./Route.js";
@@ -49,11 +49,14 @@ class RoutingConfigurator {
 			}
 		}
 	}
-	private controllers: NodeJS.Dict<BaseControllerConstructor> = {};
+	private controllers: NodeJS.Dict<BaseControllerConstructor | BaseControllerConstructor[]> = {};
 	private async loadControllerFromFile(path: string) {
-		let controller: BaseControllerConstructor = (await import(path + "?" + Date.now())).default;
+		const controller: BaseControllerConstructor | BaseControllerConstructor[] = (await import(path + "?" + Date.now())).default;
 		if (!controller) return;
-		this.registerRoutesFromController(controller);
+		if (Array.isArray(controller))
+			controller.forEach(controller => this.registerRoutesFromController(controller));
+		else
+			this.registerRoutesFromController(controller);
 
 		if (this.core.isDev) {
 			this.controllers[resolve(path)] = controller;
@@ -62,7 +65,11 @@ class RoutingConfigurator {
 	private unloadControllerFromFile(path: string) {
 		let controller = this.controllers[path];
 		if (!controller) return;
-		this.unregisterRoutesFromController(controller);
+
+		if (Array.isArray(controller))
+			controller.forEach(controller => this.unregisterRoutesFromController(controller));
+		else
+			this.unregisterRoutesFromController(controller);
 
 		delete this.controllers[resolve(path)];
 	}
@@ -106,9 +113,13 @@ class RoutingConfigurator {
 			throw new ReferenceError(`Can't laod module "${name}"`);
 
 		// const path = normilize(module);
-		let controller: BaseControllerConstructor = (await import(name)).default;
+		const controller: BaseControllerConstructor | BaseControllerConstructor[] = (await import(name)).default;
+
 		if (!controller) return;
-		this.registerRoutesFromController(controller);
+		if (Array.isArray(controller))
+			controller.forEach(controller => this.registerRoutesFromController(controller));
+		else
+			this.registerRoutesFromController(controller);
 	}
 
 	public loadControllers(paths: string | string[], deep: number = 4) {
