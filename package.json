@@ -1,6 +1,6 @@
 {
   "name": "wulfy",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Wulfy",
   "repository": "https://github.com/Wulfy-JS/Wulfy",
   "main": "dist/index.js",
