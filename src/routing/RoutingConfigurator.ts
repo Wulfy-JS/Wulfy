@@ -51,7 +51,7 @@ class RoutingConfigurator {
 	}
 	private controllers: NodeJS.Dict<BaseControllerConstructor | BaseControllerConstructor[]> = {};
 	private async loadControllerFromFile(path: string) {
-		const controller: BaseControllerConstructor | BaseControllerConstructor[] = (await import(path + "?" + Date.now())).default;
+		const controller: BaseControllerConstructor | BaseControllerConstructor[] = (await import("file://" + path + "?" + Date.now())).default;
 		if (!controller) return;
 		if (Array.isArray(controller))
 			controller.forEach(controller => this.registerRoutesFromController(controller));
