@@ -7,8 +7,7 @@ import { Headers } from "../utils/Header";
 
 export default abstract class Controller {
 	constructor() {
-		//@ts-ignore
-		loadServices()
+		// loadServices()
 	}
 
 
