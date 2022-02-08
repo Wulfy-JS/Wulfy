@@ -12,18 +12,17 @@ export default abstract class Core {
 		this.init();
 	}
 
-	protected getRoute(req: Request): Route {
-		//@ts-ignore
-		return;
+	protected getRoute(request: Request): Route | undefined {
+		return this.router.getRoute(request);
 	}
 
-	protected getResponse(req: Request): Response {
-		const request = this.getRoute(req);
-		if (!request)
+	protected getResponse(request: Request): Response {
+		const route = this.getRoute(request);
+		if (!route)
 			return new RawResponse().setStatus(404);
 
 		try {
-			return request.getResponse(req);
+			return route.getResponse(request);
 		} catch (e) {
 			return new RawResponse().setStatus(500);
 		}
