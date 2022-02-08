@@ -1,17 +1,18 @@
 import { IncomingMessage } from "http";
-import { BaseController, Route } from "../../..";
+import Controller from "../../../Controller/Controller";
+import Request from "../../../Request/Request";
 
-class TestController extends BaseController {
-	protected index(params: NodeJS.Dict<string>, request: IncomingMessage) {
+class TestController extends Controller {
+	protected index(request: Request, params: NodeJS.Dict<string>) {
 		return this.response("HELLO 2!");
 	}
 }
 
-Route({
-	name: "test",
-	path: "/test",
-	controller: TestController,
-	handler: "index"
-})
+// Route({
+// 	name: "test",
+// 	path: "/test",
+// 	controller: TestController,
+// 	handler: "index"
+// })
 
 export default TestController;

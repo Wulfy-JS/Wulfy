@@ -1,7 +1,7 @@
-import { BaseController, Route } from "../..";
+import Controller from "../../Controller/Controller";
 
-class TestController extends BaseController {
-	@Route({ name: "TT", path: "/tt" })
+class TestController extends Controller {
+	// @Route({ name: "TT", path: "/tt" })
 	index() {
 		return this.response("Test")
 	}

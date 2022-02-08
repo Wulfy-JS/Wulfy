@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
     "start": "node --es-module-specifier-resolution=node dist/index.js",
-    "test": "node --experimental-import-meta-resolve --es-module-specifier-resolution=node dist/test/index.js"
+    "test": "node --experimental-modules --es-module-specifier-resolution=node dist/test/index.js | npx pino-pretty"
   },
   "author": "80LK",
   "license": "MIT",
