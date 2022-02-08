@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
     "start": "node --es-module-specifier-resolution=node dist/index.js",
-    "test": "node --es-module-specifier-resolution=node dist/test/index.js"
+    "test": "node --experimental-import-meta-resolve --es-module-specifier-resolution=node dist/test/index.js"
   },
   "author": "80LK",
   "license": "MIT",
@@ -27,6 +27,7 @@
     "mime": "^3.0.0",
     "nunjucks": "^3.2.3",
     "path-to-regexp": "^6.2.0",
+    "pino": "^7.6.5",
     "sequelize": "^6.9.0",
     "simcfg": "^1.0.4"
   },

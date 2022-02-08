@@ -7,12 +7,15 @@ import FileResponse from "./response/FileResponse.js";
 import RenderSevice from "./services/RenderService.js";
 import BaseModel, { StaticBaseModel } from "./model/BaseModel.js";
 import Route from "./routing/Route.js";
+import Logger from "./utils/Logger.js";
 
 export default Core;
 
 export {
+	Core,
 	RoutingConfigurator,
 	Route,
+	Logger,
 
 	BaseController,
 

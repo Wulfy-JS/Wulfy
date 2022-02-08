@@ -18,6 +18,7 @@ import BaseModel from "../model/BaseModel.js"
 import ListServices from "../services/ListServices.js";
 import RenderService from "../services/RenderService.js";
 import final from "../utils/final.js";
+import Logger from "../utils/Logger";
 
 
 interface DataBaseConfig {
@@ -83,7 +84,7 @@ abstract class Core {
 				this._sequelize.sync({ [databaseConfig.mode]: true });
 			BaseModel.setup(this._sequelize);
 		} else {
-			console.warn("No configuration for database! Models not works!");
+			Logger.warn("No configuration for database! Models not works!");
 		}
 
 		//Core
@@ -183,6 +184,7 @@ abstract class Core {
 	protected async response(req: IncomingMessage, res: ServerResponse) {
 		const response = await this.getResponse(req);
 		response.response(res, this.config);
+		Logger.info(`${req.socket.remoteAddress} - - "${req.method} ${req.url} HTTP/${req.httpVersion}" ${response.getStatus()} ${""/*size */} "${req.headers.referer || "-"}" ${req.headers["user-agent"] || ""}`);
 	}
 }
 

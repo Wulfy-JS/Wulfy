@@ -8,6 +8,7 @@ import RouteMap from "./RouteMap.js";
 import RouteOptions from "./RouteOptions.js";
 import StaticRoute from "./StaticRoute.js";
 import normilize from "../utils/normilize.js";
+import Logger from "../utils/Logger.js";
 
 export type Route = RouteOptions<string | RegExp> & RouteHandler;
 
@@ -53,6 +54,7 @@ class RoutingConfigurator {
 	private async loadControllerFromFile(path: string) {
 		const controller: BaseControllerConstructor | BaseControllerConstructor[] = (await import("file://" + path + "?" + Date.now())).default;
 		if (!controller) return;
+		Logger.info(`Load controller from ${path}`);
 		if (Array.isArray(controller))
 			controller.forEach(controller => this.registerRoutesFromController(controller));
 		else
@@ -116,6 +118,8 @@ class RoutingConfigurator {
 		const controller: BaseControllerConstructor | BaseControllerConstructor[] = (await import(name)).default;
 
 		if (!controller) return;
+		Logger.info(`Load controller from module "${name}"`);
+
 		if (Array.isArray(controller))
 			controller.forEach(controller => this.registerRoutesFromController(controller));
 		else
@@ -128,7 +132,7 @@ class RoutingConfigurator {
 
 		return Promise.all(
 			paths.map(async path => {
-				if (path[0] != ".")
+				if (!/^\.|\//.test(path))
 					return await this.loadControllersFromModule(path);
 				else
 					path = normilize(this.root + "/" + path);
