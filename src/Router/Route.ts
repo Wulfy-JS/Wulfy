@@ -2,7 +2,8 @@ import { ConstructorController, ControllerHandler } from "../Controller/Controll
 import Request from "../Request/Request";
 import Response from "../Response/Response";
 import RouteInfo from "./RouteInfo";
-import { match } from "path-to-regexp";
+import ptr from "path-to-regexp";
+import Logger from "../utils/Logger";
 
 
 class Route {
@@ -22,11 +23,11 @@ class Route {
 		else if (this.routeinfo.method != "all" && this.routeinfo.method != request.method)
 			return false;
 
-		const _match = match<NodeJS.Dict<string>>(this.routeinfo.path)(request.path);
-		if (_match)
-			return _match.params || false;
 
-		return false;
+		const _match = ptr.match<NodeJS.Dict<string>>(this.routeinfo.path)(request.path);
+		if (!_match) return false;
+
+		return _match.params || false;
 	}
 
 	public getResponse(request: Request): Response {
@@ -34,10 +35,11 @@ class Route {
 		if (params === false)
 			throw new ReferenceError("The route does not match the request.");
 
+		const controller = new this.controller();
 		//@ts-ignore
-		const handler: ControllerHandler = new this.controller()[this.handler];
+		const handler: ControllerHandler = controller[this.handler];
 
-		const response: Response = handler(request, params);
+		const response: Response = handler.apply(controller, [request, params]);
 		if (!Response.isResponse(response))
 			throw new ReferenceError(`Handler ${this.controller.name}.${this.handler} return not Response`);
 		return response;

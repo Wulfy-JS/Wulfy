@@ -33,7 +33,9 @@ export default abstract class Controller {
 			.setFile(path);
 	}
 
-	private [symbol] = symbol;
+	private get [symbol]() {
+		return symbol;
+	};
 	public static isController(obj: any): obj is Controller {
 		return obj[symbol] == symbol;
 	}

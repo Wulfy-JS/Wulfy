@@ -1,9 +1,11 @@
 import Controller from "../../Controller/Controller";
+import RawResponse from "../../Response/StringResponce";
 import Route from "../../Router/Route.dec";
 
 class TestController extends Controller {
 	@Route({ name: "TT", path: "/tt" })
-	index() {
+	public index(): RawResponse {
+		console.log("TT INDEX", this);
 		return this.response("Test")
 	}
 }

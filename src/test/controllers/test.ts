@@ -9,8 +9,8 @@ class TestController extends Controller {
 		return this.response("HELLO!");
 	}
 
-	@Route({ name: "asd", path: "/asd/(\\d+)" })
-	protected test(params: any) {
+	@Route({ name: "asd", path: "asd/(\\d+)" })
+	protected test(request: Request, params: any) {
 		return this.json({ name: "test", params });
 	}
 }

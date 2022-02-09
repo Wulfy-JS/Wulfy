@@ -80,4 +80,4 @@ function Route(path_route: string | RouteOptions | RouteConfigurate): RouteCalss
 }
 
 export default Route;
-export { getRouteAttributesKey };
+export { getRouteAttributesKey, ROOT_ATTRIBUTES };

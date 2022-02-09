@@ -67,9 +67,10 @@ class HttpCore extends Core {
 		});
 	}
 
-	protected configure(): void {
-		// process.cwd == path root wulfy
-		this.loadControllers("./dist/test/controllers");
+	protected configure() {
+		return {
+			root: "./dist/test"
+		}
 	}
 }
 
