@@ -6,8 +6,13 @@ import Router from "../Router/Router";
 import final from "../utils/final";
 import Logger from "../utils/Logger";
 import dotenv from "dotenv";
+import { SingleOrArr } from "../utils/SingleOrArr";
+import normalize from "../utils/normalize";
 
 export default abstract class Core {
+	public static rootPath = normalize(process.cwd() + "/");
+	private static modulePath = normalize(import.meta.url + "/../../../");
+
 	public constructor() {
 		this.init();
 		this.configure();
@@ -33,6 +38,14 @@ export default abstract class Core {
 	}
 
 	/**
+	 * Load controller from path or module
+	 * @param {string|string[]} path 
+	 */
+	protected loadControllers(path: SingleOrArr<string>) {
+		console.log(Core.rootPath, Core.modulePath);
+	}
+
+	/**
 	 * Initialization app. Override to init the server
 	 */
 	protected init(): void {
@@ -43,7 +56,7 @@ export default abstract class Core {
 	 * Configure core 
 	 */
 	protected configure(): void {
-		// loadControllers
+		this.loadControllers("")
 	}
 
 	/**
