@@ -20,10 +20,10 @@
     "@types/nunjucks": "^3.2.0",
     "chokidar": "^3.5.2",
     "ts-cleaner": "^1.0.5",
-    "typescript": "^4.4.4",
-    "wulfy-http-core": "^0.1.2"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
+    "dotenv": "^16.0.0",
     "mime": "^3.0.0",
     "nunjucks": "^3.2.3",
     "path-to-regexp": "^6.2.0",

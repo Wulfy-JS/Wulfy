@@ -5,12 +5,16 @@ import Route from "../Router/Route";
 import Router from "../Router/Router";
 import final from "../utils/final";
 import Logger from "../utils/Logger";
+import dotenv from "dotenv";
 
 export default abstract class Core {
-	private router: Router = new Router();
 	public constructor() {
 		this.init();
+		this.configure();
+		dotenv.config();
 	}
+
+	private router: Router = new Router();
 
 	protected getRoute(request: Request): Route | undefined {
 		return this.router.getRoute(request);
@@ -33,6 +37,13 @@ export default abstract class Core {
 	 */
 	protected init(): void {
 		Logger.info("Initialization core");
+	}
+
+	/**
+	 * Configure core 
+	 */
+	protected configure(): void {
+		// loadControllers
 	}
 
 	/**

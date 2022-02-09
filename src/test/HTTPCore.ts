@@ -1,6 +1,8 @@
 import { createServer, Server } from "http";
 import { Readable } from "stream";
 import Core from "../Core/Core";
+import Request from "../Request/Request";
+import RouteMethods from "../Router/RouteMethods";
 import Logger from "../utils/Logger";
 
 declare module "http" {
@@ -10,22 +12,17 @@ declare module "http" {
 }
 
 class HttpCore extends Core {
-	private port: number;
-	private server: Server;
-
-	constructor() {
-		super();
-
-		this.port = 8080;
-		this.server = createServer();
-	}
+	private port?: number;
+	private server?: Server;
 
 	protected init() {
+		this.port = 8080;
+		this.server = createServer();
 		this.server.on("request", (req, res) => {
 			req.body = "";
 			req.on("data", c => req.body += c);
 			req.on("end", () => {
-				const request = {
+				const request: Request = {
 					headers: req.headers,
 					method: req.method || "get",
 					path: req.url || "/",
@@ -51,17 +48,21 @@ class HttpCore extends Core {
 					}
 				}
 				res.end();
+				Logger.info(`${request.method} ${request.path} HTTP/${req.httpVersion} ${res.statusCode} ${req.headers['user-agent'] || "-"}`);
 			})
 		})
 	}
 
 	protected __start() {
+		if (!this.server) return;
 		const port = this.port || 80
 		this.server.listen(port, () => {
 			Logger.info(`Server launch in port ${port}`);
 		});
 	}
 	protected __stop() {
+		if (!this.server) return;
+
 		this.server.close(e => {
 			e ? Logger.error(e) : Logger.info(`Server stoped`);
 		});

@@ -1,4 +1,7 @@
+import { SingleOrArr } from "../utils/SingleOrArr";
+import RouteMethods from "./RouteMethods";
+
 export default interface RouteInfo {
 	path: string;
-	method: string;
+	method: SingleOrArr<string>;
 }

@@ -43,8 +43,6 @@ export default abstract class Response<T = any> {
 	}
 
 	private [symbol] = symbol;
-
-
 	public static isResponse(obj: any): obj is Response {
 		return obj[symbol] == symbol;
 	}

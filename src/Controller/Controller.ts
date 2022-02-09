@@ -4,6 +4,7 @@ import JsonResponse from "../Response/JsonResponse";
 import Response from "../Response/Response";
 import RawResponse from "../Response/StringResponce";
 import { Headers } from "../utils/Header";
+const symbol = Symbol.for("Wulfy.Controller");
 
 export default abstract class Controller {
 	constructor() {
@@ -31,10 +32,17 @@ export default abstract class Controller {
 			.setHeaders(headers)
 			.setFile(path);
 	}
+
+	private [symbol] = symbol;
+	public static isController(obj: any): obj is Controller {
+		return obj[symbol] == symbol;
+	}
 }
 
 interface ConstructorController {
 	new(): Controller;
 }
-
-export { ConstructorController };
+interface ControllerHandler {
+	(request: Request, params: NodeJS.Dict<string>): Response;
+}
+export { ConstructorController, ControllerHandler };
