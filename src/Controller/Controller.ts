@@ -2,14 +2,13 @@ import Request from "../Request/Request";
 import FileResponse from "../Response/FileResponse";
 import JsonResponse from "../Response/JsonResponse";
 import Response from "../Response/Response";
-import RawResponse from "../Response/StringResponce";
+import RawResponse from "../Response/RawResponse";
 import { Headers } from "../utils/Header";
+import { ListServices } from "../Service/Service";
 const symbol = Symbol.for("Wulfy.Controller");
 
 export default abstract class Controller {
-	constructor() {
-		// loadServices()
-	}
+	constructor(protected readonly services: ListServices) { }
 
 
 	protected response(content: string | Buffer, status: number = 200, headers: Headers = {}) {
@@ -33,6 +32,17 @@ export default abstract class Controller {
 			.setFile(path);
 	}
 
+	protected async render(file: string, params?: NodeJS.Dict<any>, status?: number, headers?: Headers): Promise<Response>;
+	protected async render(file: string, params: { charset: BufferEncoding, [key: string]: string }, status?: number, headers?: Headers): Promise<Response>;
+	protected async render(file: string, params: NodeJS.Dict<any> = {}, status: number = 200, headers: Headers = {}) {
+		const charset = params.charset || undefined;
+		delete params.charset;
+
+		return (await this.services.NunjucksService.render(file, params, charset))
+			.setStatus(status)
+			.setHeaders(headers);
+	}
+
 	private get [symbol]() {
 		return symbol;
 	};
@@ -42,7 +52,7 @@ export default abstract class Controller {
 }
 
 interface ConstructorController {
-	new(): Controller;
+	new(services: ListServices): Controller;
 }
 interface ControllerHandler {
 	(request: Request, params: NodeJS.Dict<string>): Response;

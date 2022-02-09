@@ -20,7 +20,7 @@ class HttpCore extends Core {
 		this.server.on("request", (req, res) => {
 			req.body = "";
 			req.on("data", c => req.body += c);
-			req.on("end", () => {
+			req.on("end", async () => {
 				const request: Request = {
 					headers: req.headers,
 					method: req.method || "get",
@@ -28,7 +28,7 @@ class HttpCore extends Core {
 					body: req.body || ""
 				};
 
-				const response = this.getResponse(request);
+				const response = await this.getResponse(request);
 
 				const headers = response.getHeaders();
 				for (const header in headers) {

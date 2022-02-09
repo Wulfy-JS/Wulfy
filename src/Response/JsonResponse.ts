@@ -1,5 +1,5 @@
 
-import RawResponse from "./StringResponce.js";
+import RawResponse from "./RawResponse.js";
 
 class JsonResponse extends RawResponse {
 	public getHeaders() {

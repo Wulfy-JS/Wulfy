@@ -1,6 +1,4 @@
-import Controller from "../../Controller/Controller";
-import Request from "../../Request/Request";
-import Route from "../../Router/Route.dec";
+import { Route, Request, Controller, Logger } from "../..";
 
 @Route("/")
 class TestController extends Controller {
@@ -12,6 +10,11 @@ class TestController extends Controller {
 	@Route({ name: "asd", path: "asd/(\\d+)" })
 	protected test(request: Request, params: any) {
 		return this.json({ name: "test", params });
+	}
+
+	@Route({ name: "render", path: "render/:name(.*)" })
+	protected _render(request: Request, params: any) {
+		return this.render("index.njk", params);
 	}
 }
 

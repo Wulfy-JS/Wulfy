@@ -1,6 +1,6 @@
 import Request from "../Request/Request";
 import Response from "../Response/Response";
-import RawResponse from "../Response/StringResponce";
+import RawResponse from "../Response/RawResponse";
 import Route from "../Router/Route";
 import Router from "../Router/Router";
 import final from "../utils/final";
@@ -11,6 +11,9 @@ import { SingleOrArr } from "../utils/SingleOrArr";
 import Controller, { ConstructorController } from "../Controller/Controller";
 import { getRouteAttributesKey, ROOT_ATTRIBUTES } from "../Router/Route.dec";
 import DotEnv from "../utils/DotEnv";
+import Model from "../Model/Model";
+import { ListServices } from "../Service/Service";
+import NunjucksService from "../Service/NunjucksService";
 
 interface Config {
 	/** 
@@ -26,7 +29,7 @@ interface Config {
 	controllers: SingleOrArr<string>;
 }
 
-export default abstract class Core {
+abstract class Core {
 	private static _root = normalize(process.cwd() + "/");
 	public static get rootPath() {
 		return this._root;
@@ -41,19 +44,24 @@ export default abstract class Core {
 	}
 
 	private router: Router = new Router();
+	private services?: ListServices;
 
 	protected getRoute(request: Request): Route | undefined {
 		return this.router.getRoute(request);
 	}
 
-	protected getResponse(request: Request): Response {
+	protected async getResponse(request: Request): Promise<Response> {
+		if (!this.services) {
+			return new RawResponse().setStatus(500);
+		}
+
 		const route = this.getRoute(request);
 		if (!route) {
 			return new RawResponse().setStatus(404);
 		}
 
 		try {
-			return route.getResponse(request);
+			return await route.getResponse(this.services, request);
 		} catch (e) {
 			Logger.error(e);
 			return new RawResponse().setStatus(500);
@@ -103,11 +111,14 @@ export default abstract class Core {
 				Core._root = normalize(process.cwd() + "/" + cfg.root + "/");
 		}
 
+		Model.setup();
 		await this.loadControllers(cfg.controllers);
 
-		//load Controllers
+		this.services = {
+			NunjucksService: new NunjucksService()
+		};
 		//load Services
-		//then start
+
 		this.__start();
 		return this;
 	};
@@ -124,7 +135,6 @@ export default abstract class Core {
 	 */
 	@final
 	public stop(): this {
-		//stop
 		this.__stop();
 		//unload Services
 		//unload Controllers
@@ -161,6 +171,7 @@ export default abstract class Core {
 		this.registerRoutesFromController(controller);
 	}
 
+
 	private registerRoutesFromController(controller: ConstructorController): void {
 		const key = getRouteAttributesKey(controller);
 		const RouteSettings = controller.prototype[key];
@@ -187,3 +198,5 @@ export default abstract class Core {
 		}
 	}
 }
+
+export default Core;

@@ -4,6 +4,7 @@ import Response from "../Response/Response";
 import RouteInfo from "./RouteInfo";
 import ptr from "path-to-regexp";
 import Logger from "../utils/Logger";
+import { ListServices } from "../Service/Service";
 
 
 class Route {
@@ -30,18 +31,22 @@ class Route {
 		return _match.params || false;
 	}
 
-	public getResponse(request: Request): Response {
+	public async getResponse(services: ListServices, request: Request): Promise<Response> {
 		const params = this.getParams(request);
 		if (params === false)
 			throw new ReferenceError("The route does not match the request.");
 
-		const controller = new this.controller();
+		const controller = new this.controller(services);
 		//@ts-ignore
 		const handler: ControllerHandler = controller[this.handler];
 
-		const response: Response = handler.apply(controller, [request, params]);
+		let response: Promise<Response> | Response = handler.apply(controller, [request, params]);
+		if (response instanceof Promise)
+			response = await response;
+
 		if (!Response.isResponse(response))
 			throw new ReferenceError(`Handler ${this.controller.name}.${this.handler} return not Response`);
+
 		return response;
 	}
 }

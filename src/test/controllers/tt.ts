@@ -1,5 +1,5 @@
 import Controller from "../../Controller/Controller";
-import RawResponse from "../../Response/StringResponce";
+import RawResponse from "../../Response/RawResponse";
 import Route from "../../Router/Route.dec";
 
 class TestController extends Controller {

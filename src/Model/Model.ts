@@ -1,4 +1,5 @@
 import s, { ModelStatic, ModelCtor, ModelAttributes, InitOptions, Sequelize, BelongsToOptions, BelongsToManyOptions, HasOneOptions, HasManyOptions } from "sequelize";
+import { Logger } from "..";
 // const { Model } = s;
 // type Model<A extends {} = any, B extends {} = A> = sequelize.Model<A, B>;
 type BelongsTo<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.BelongsTo<S, T>;
@@ -169,8 +170,27 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 	}
 
 
-	public static setup(sequelize: Sequelize) {
-		this._sequelize = sequelize;
+	public static setup() {
+		if (process.env.DATABASE_URL == undefined) {
+			Logger.warn(`No configuration for database! Models not works!`);
+			return;
+		}
+
+		this._sequelize = new s.Sequelize(process.env.DATABASE_URL, {
+			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+		});
+
+		switch (process.env.DATABASE_MODE) {
+			case 'alter':
+			case 'force':
+				if (process.env.MODE == "dev")
+					this._sequelize.sync({ [process.env.DATABASE_MODE]: true });
+				break;
+			case "prod": break;
+			default:
+				Logger.warn(`Unknown mode "${process.env.DATABASE_MODE}" for sequelize`);
+		}
+
 		this.models.forEach(e => e._init());
 		this.models.forEach(e => e._setup());
 	}
