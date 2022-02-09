@@ -1,5 +1,5 @@
 import s, { ModelStatic, ModelCtor, ModelAttributes, InitOptions, Sequelize, BelongsToOptions, BelongsToManyOptions, HasOneOptions, HasManyOptions } from "sequelize";
-const { Model } = s;
+// const { Model } = s;
 // type Model<A extends {} = any, B extends {} = A> = sequelize.Model<A, B>;
 type BelongsTo<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.BelongsTo<S, T>;
 type BelongsToMany<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.BelongsToMany<S, T>;
@@ -30,18 +30,18 @@ interface SetupData<T extends s.Model<any, any> = any> {
 	}[];
 }
 
-abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes extends {} = TModelAttributes>
+abstract class Model<TModelAttributes extends {} = any, TCreationAttributes extends {} = TModelAttributes>
 	extends s.Model<TModelAttributes, TCreationAttributes>
 {
 	private static _sequelize: Sequelize;
 	private static _setupData: SetupData;
-	private static models: Set<typeof BaseModel> = new Set();
+	private static models: Set<typeof Model> = new Set();
 
-	public static init<MS extends ModelStatic<BaseModel>, M extends InstanceType<MS>>(
+	public static init<MS extends ModelStatic<Model>, M extends InstanceType<MS>>(
 		this: MS,
 		attributes: ModelAttributes<M, M['_attributes']>, options?: Partial<InitOptions<M>>
 	): MS;
-	public static init<MS extends ModelStatic<BaseModel>, M extends InstanceType<MS>>(
+	public static init<MS extends ModelStatic<Model>, M extends InstanceType<MS>>(
 		attributes: ModelAttributes<M, M['_attributes']>, options: Partial<InitOptions<M>> = {}
 	) {
 		this._setupData = {
@@ -56,7 +56,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		if (this._sequelize)
 			this._init()
 		else
-			BaseModel.models.add(this);
+			Model.models.add(this);
 
 		return this;
 	}
@@ -83,7 +83,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		if (this._sequelize)
 			return this._belongsTo()
 
-		BaseModel.models.add(this);
+		Model.models.add(this);
 		return
 	}
 	private static _belongsTo() {
@@ -108,7 +108,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		if (this._sequelize)
 			return this._belongsToMany()
 
-		BaseModel.models.add(this);
+		Model.models.add(this);
 		return
 	}
 	private static _belongsToMany() {
@@ -132,7 +132,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		if (this._sequelize)
 			return this._hasOne()
 
-		BaseModel.models.add(this);
+		Model.models.add(this);
 		return
 	}
 	private static _hasOne() {
@@ -156,7 +156,7 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 		if (this._sequelize)
 			return this._hasMany()
 
-		BaseModel.models.add(this);
+		Model.models.add(this);
 		return
 	}
 	private static _hasMany() {
@@ -184,8 +184,8 @@ abstract class BaseModel<TModelAttributes extends {} = any, TCreationAttributes 
 }
 
 
-interface StaticBaseModel<T extends s.Model> extends ModelCtor<T> {
+interface StaticModel<T extends s.Model> extends ModelCtor<T> {
 	new(): T;
 }
-export default BaseModel;
-export { StaticBaseModel };
+export default Model;
+export { StaticModel };

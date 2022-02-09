@@ -36,8 +36,8 @@ export default abstract class Core {
 	};
 
 	public constructor() {
-		this.init();
 		DotEnv.init();
+		this.init();
 	}
 
 	private router: Router = new Router();
