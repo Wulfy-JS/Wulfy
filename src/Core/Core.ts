@@ -11,7 +11,7 @@ import normalize from "../utils/normalize";
 
 export default abstract class Core {
 	public static rootPath = normalize(process.cwd() + "/");
-	private static modulePath = normalize(import.meta.url + "/../../../");
+	private static wulfyPath = normalize(import.meta.url + "/../../../");
 
 	public constructor() {
 		this.init();
@@ -42,7 +42,7 @@ export default abstract class Core {
 	 * @param {string|string[]} path 
 	 */
 	protected loadControllers(path: SingleOrArr<string>) {
-		console.log(Core.rootPath, Core.modulePath);
+		console.log(Core.rootPath, Core.wulfyPath);
 	}
 
 	/**
