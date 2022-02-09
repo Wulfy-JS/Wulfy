@@ -5,7 +5,6 @@ import Route from "../../Router/Route.dec";
 class TestController extends Controller {
 	@Route({ name: "TT", path: "/tt" })
 	public index(): RawResponse {
-		console.log("TT INDEX", this);
 		return this.response("Test")
 	}
 }
