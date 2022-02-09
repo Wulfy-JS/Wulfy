@@ -2,7 +2,6 @@ import { createServer, Server } from "http";
 import { Readable } from "stream";
 import Core from "../Core/Core";
 import Request from "../Request/Request";
-import RouteMethods from "../Router/RouteMethods";
 import Logger from "../utils/Logger";
 
 declare module "http" {
@@ -68,12 +67,10 @@ class HttpCore extends Core {
 		});
 	}
 
-	// protected configure(config: Config): void {
-	// }
-	// protected configureRoutes(routes: RoutingConfigurator): void {
-	// 	routes.loadControllers("/dist/test/controllers")
-	// 	// throw new Error("Method not implemented.");
-	// }
+	protected configure(): void {
+		// process.cwd == path root wulfy
+		this.loadControllers("./dist/test/controllers");
+	}
 }
 
 export default HttpCore;
