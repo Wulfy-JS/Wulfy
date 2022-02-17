@@ -9,10 +9,11 @@ import normalize from "../utils/normalize";
 import { ConstructorController } from "../Controller/Controller";
 import DotEnv from "../utils/DotEnv";
 import Model from "../Model/Model";
-import { ListServices } from "../Service/Service";
+import { ConstructorService, ListServices } from "../Service/Service";
 import NunjucksService from "../Service/NunjucksService";
 import Config from "./Config";
 import ControllersLoader from "../Loader/ControllersLoader";
+import ServicesLoader from "../Loader/ServicesLoader";
 
 
 
@@ -32,6 +33,7 @@ abstract class Core {
 
 	private router: Router = new Router();
 	private controllersLoader = new ControllersLoader();
+	private servicesLoader = new ServicesLoader();
 
 	private services?: ListServices;
 
@@ -71,9 +73,11 @@ abstract class Core {
 	protected configure(): Partial<Config> {
 		return Core.defaultConfig
 	}
+
 	private static defaultConfig: Config = {
 		root: Core.rootPath,
 		controllers: "./controllers/**/*.js",
+		services: "./services/**/*.js",
 		views: "./views/"
 	}
 
@@ -113,12 +117,19 @@ abstract class Core {
 			this.router.registerRoutesFromController(controller);
 		})
 
+		this.servicesLoader.setRoot(Core.rootPath);
+		this.servicesLoader.on("load", (service: ConstructorService, path: string) => {
+			Logger.debug(`Load service ${service.name} from file "${path}"`);
+			if (!this.services) throw new ReferenceError();
+			this.services[service.name] = new service(cfg);
+		});
+
 		await this.controllersLoader.load(cfg.controllers)
 
 		this.services = {
 			NunjucksService: new NunjucksService(cfg)
 		};
-		//load Services
+		await this.servicesLoader.load(cfg.services);
 
 		this.__start();
 		return this;

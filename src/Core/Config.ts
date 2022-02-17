@@ -8,10 +8,16 @@ interface Config {
 	root: string;
 
 	/** 
-	 * Paths to controllers
+	 * Glob paths to controllers
 	 * @default ".\/controllers\/**\/*.js"
 	*/
 	controllers: SingleOrArr<string>;
+
+	/** 
+	 * Glob paths to services
+	 * @default ".\/services\/**\/*.js"
+	*/
+	services: SingleOrArr<string>;
 
 	/**
 	 * Paths to views
