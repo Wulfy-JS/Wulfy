@@ -1,4 +1,5 @@
 import nunjucks from "nunjucks";
+import Config from "../Core/Config";
 import Core from "../Core/Core";
 import RawResponse from "../Response/RawResponse";
 import normalize from "../utils/normalize";
@@ -7,10 +8,10 @@ import Service from "./Service";
 class NunjucksService extends Service {
 	private _e: nunjucks.Environment;
 
-	constructor() {
-		super();
+	constructor(config: Config) {
+		super(config);
 
-		const path = normalize(Core.rootPath + (process.env.VIEWS || "/src/views"));
+		const path = normalize(Core.rootPath + (process.env.VIEWS || config.views || "./views/"));
 		const isDev = process.env.MODE == "dev";
 
 		this._e = new nunjucks.Environment(new nunjucks.FileSystemLoader(path, {

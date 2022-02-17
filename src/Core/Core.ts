@@ -73,7 +73,15 @@ abstract class Core {
 	}
 	private static defaultConfig: Config = {
 		root: Core.rootPath,
-		controllers: "./controllers/**/*.js"
+		controllers: "./controllers/**/*.js",
+		views: "./views/"
+	}
+
+	protected getConfig(): Config {
+		return {
+			...Core.defaultConfig,
+			...this.configure()
+		}
 	}
 
 	/**
@@ -88,10 +96,7 @@ abstract class Core {
 	 */
 	@final
 	public async start(): Promise<this> {
-		const cfg = {
-			...Core.defaultConfig,
-			...this.configure()
-		};
+		const cfg = this.getConfig();
 
 		if (Core._root != cfg.root) {
 			if (/^(?:(?:[a-z]|file):)?\//i.test(cfg.root))
@@ -104,7 +109,7 @@ abstract class Core {
 		await this.loadControllers(cfg.controllers);
 
 		this.services = {
-			NunjucksService: new NunjucksService()
+			NunjucksService: new NunjucksService(cfg)
 		};
 		//load Services
 

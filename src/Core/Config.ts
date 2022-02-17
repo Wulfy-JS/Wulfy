@@ -13,6 +13,11 @@ interface Config {
 	*/
 	controllers: SingleOrArr<string>;
 
+	/**
+	 * Paths to views
+	 * @default "./views/"
+	 */
+	views: string;
 }
 
 export default Config;
