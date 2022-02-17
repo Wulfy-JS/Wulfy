@@ -18,9 +18,11 @@ class Route {
 	}
 
 	public getParams(request: Request) {
-		if (Array.isArray(this.routeinfo.method) && this.routeinfo.method.indexOf(request.method) == -1)
+		const routeMethod = Array.isArray(this.routeinfo.method) ? this.routeinfo.method.map(e => e.toLowerCase()) : this.routeinfo.method.toLowerCase();
+
+		if (Array.isArray(routeMethod) && routeMethod.indexOf(request.method) == -1)
 			return false;
-		else if (this.routeinfo.method != "all" && this.routeinfo.method != request.method)
+		else if (routeMethod != "all" && routeMethod != request.method)
 			return false;
 
 
