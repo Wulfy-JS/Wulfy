@@ -1,8 +1,10 @@
-import { BaseController, Route } from "../..";
+import Controller from "../../Controller/Controller";
+import RawResponse from "../../Response/RawResponse";
+import Route from "../../Router/Route.dec";
 
-class TestController extends BaseController {
+class TestController extends Controller {
 	@Route({ name: "TT", path: "/tt" })
-	index() {
+	public index(): RawResponse {
 		return this.response("Test")
 	}
 }

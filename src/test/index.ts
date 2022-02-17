@@ -1,3 +1,3 @@
 import HTTPCore from "./HTTPCore";
 
-new HTTPCore().launch();
+new HTTPCore().start();

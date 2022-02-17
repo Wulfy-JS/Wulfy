@@ -1,6 +1,6 @@
 {
   "name": "wulfy",
-  "version": "0.1.14",
+  "version": "0.2.0",
   "description": "Wulfy",
   "repository": "https://github.com/Wulfy-JS/Wulfy",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
     "start": "node --es-module-specifier-resolution=node dist/index.js",
-    "test": "node --es-module-specifier-resolution=node dist/test/index.js"
+    "test": "node --experimental-modules --es-module-specifier-resolution=node dist/test/index.js | npx pino-pretty"
   },
   "author": "80LK",
   "license": "MIT",
@@ -18,17 +18,20 @@
     "@types/mime": "^2.0.3",
     "@types/node": "^16.11.6",
     "@types/nunjucks": "^3.2.0",
+    "@types/validator": "^13.7.1",
     "chokidar": "^3.5.2",
+    "pino-pretty": "^7.5.1",
     "ts-cleaner": "^1.0.5",
-    "typescript": "^4.4.4",
-    "wulfy-http-core": "^0.1.2"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
+    "dotenv": "^16.0.0",
+    "fast-glob": "^3.2.11",
     "mime": "^3.0.0",
     "nunjucks": "^3.2.3",
     "path-to-regexp": "^6.2.0",
-    "sequelize": "^6.9.0",
-    "simcfg": "^1.0.4"
+    "pino": "^7.6.5",
+    "sequelize": "^6.16.1"
   },
   "peerDependencies": {
     "chokidar": "^3.5.2"
