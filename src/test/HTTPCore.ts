@@ -3,6 +3,7 @@ import { Readable } from "stream";
 import Core from "../Core/Core";
 import Request from "../Request/Request";
 import Logger from "../utils/Logger";
+import { networkInterfaces } from "os";
 
 declare module "http" {
 	interface IncomingMessage {
@@ -57,6 +58,10 @@ class HttpCore extends Core {
 		const port = this.port || 80
 		this.server.listen(port, () => {
 			Logger.info(`Server launch in port ${port}`);
+			const ip = getNetworkAddress();
+			Logger.info(`Local - http://localhost:${port}`);
+			if (ip !== false)
+				Logger.info(`Local - http://${ip}:${port}`);
 		});
 	}
 	protected __stop() {
@@ -73,5 +78,22 @@ class HttpCore extends Core {
 		}
 	}
 }
+
+const getNetworkAddress = () => {
+	const interfaces = networkInterfaces();
+	if (interfaces === undefined) return false;
+
+	for (const name of Object.keys(interfaces)) {
+		const _interface = interfaces[name];
+		if (_interface == undefined) continue;
+		for (const _adress of _interface) {
+			const { address, family, internal } = _adress;
+			if (family === 'IPv4' && !internal) {
+				return address;
+			}
+		}
+	}
+	return false;
+};
 
 export default HttpCore;
