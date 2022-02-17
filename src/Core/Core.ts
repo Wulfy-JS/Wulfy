@@ -6,15 +6,13 @@ import Router from "../Router/Router";
 import final from "../utils/final";
 import Logger from "../utils/Logger";
 import normalize from "../utils/normalize";
-import glob from "fast-glob";
-import { SingleOrArr } from "../utils/SingleOrArr";
-import Controller, { ConstructorController } from "../Controller/Controller";
-import { getRouteAttributesKey, ROOT_ATTRIBUTES } from "../Router/Route.dec";
+import { ConstructorController } from "../Controller/Controller";
 import DotEnv from "../utils/DotEnv";
 import Model from "../Model/Model";
 import { ListServices } from "../Service/Service";
 import NunjucksService from "../Service/NunjucksService";
 import Config from "./Config";
+import ControllersLoader from "../Loader/ControllersLoader";
 
 
 
@@ -33,6 +31,8 @@ abstract class Core {
 	}
 
 	private router: Router = new Router();
+	private controllersLoader = new ControllersLoader();
+
 	private services?: ListServices;
 
 	protected getRoute(request: Request): Route | undefined {
@@ -106,7 +106,14 @@ abstract class Core {
 		}
 
 		Model.setup();
-		await this.loadControllers(cfg.controllers);
+
+		this.controllersLoader.setRoot(Core.rootPath);
+		this.controllersLoader.on("load", (controller: ConstructorController, path: string) => {
+			Logger.debug(`Load routes from controller ${controller.name} from file "${path}"`)
+			this.router.registerRoutesFromController(controller);
+		})
+
+		await this.controllersLoader.load(cfg.controllers)
 
 		this.services = {
 			NunjucksService: new NunjucksService(cfg)
@@ -134,63 +141,6 @@ abstract class Core {
 		//unload Controllers
 		return this;
 	};
-
-	private async loadControllers(globControllers: SingleOrArr<string>): Promise<void> {
-		await Promise.all(
-			(await glob(globControllers, { cwd: Core.rootPath }))
-				.map(path => normalize(Core.rootPath + path))
-				.filter(path => {
-					const isJS = path.endsWith(".js");
-					if (!isJS)
-						Logger.warn(`File ${path} is not JavaScript file.`);
-					return isJS;
-				})
-				.map(path => this.loadController(path))
-		);
-	}
-
-	private async loadController(pathController: string): Promise<void> {
-		const controller = (await <Promise<{ default: ConstructorController }>>import("file://" + pathController)).default;
-		if (!controller) {
-			Logger.warn(`File ${pathController} does not export anything by default`);
-			return;
-		}
-
-		if (!Controller.isController(controller.prototype)) {
-			Logger.warn(`File ${pathController} export default not Controller`);
-			return;
-		}
-
-		Logger.debug(`Load routes from controller ${controller.name} from file "${pathController}"`)
-		this.registerRoutesFromController(controller);
-	}
-
-
-	private registerRoutesFromController(controller: ConstructorController): void {
-		const key = getRouteAttributesKey(controller);
-		const RouteSettings = controller.prototype[key];
-		if (!RouteSettings) return;
-
-		const rootPath = RouteSettings[ROOT_ATTRIBUTES] || "";
-
-		for (const key in RouteSettings) {
-			if (key == ROOT_ATTRIBUTES) continue;
-			const routeDesc = RouteSettings[key];
-			try {
-				const routeinfo = {
-					method: routeDesc.method || "all",
-					path: rootPath + (routeDesc.path || "")
-				};
-				this.router.registerRoute(
-					routeDesc.name,
-					new Route(routeinfo, controller, key)
-				)
-				Logger.debug(routeinfo, `Register route ${routeDesc.name}`);
-			} catch (e) {
-				Logger.error(e);
-			}
-		}
-	}
 }
 
 export default Core;

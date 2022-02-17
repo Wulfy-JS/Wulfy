@@ -1,7 +1,9 @@
 import Request from "../Request/Request";
 import Route from "./Route";
 import "../utils/Map.ext"
-import Logger from "../utils/Logger";
+import { ConstructorController } from "../Controller/Controller";
+import { getRouteAttributesKey, ROOT_ATTRIBUTES } from "./Route.dec";
+import { Logger } from "..";
 
 export default class Router {
 	private routes: Map<string, Route> = new Map();
@@ -11,6 +13,32 @@ export default class Router {
 			throw new RangeError(`Route "${name}" alredy been register.`);
 
 		this.routes.set(name, route);
+	}
+
+	public registerRoutesFromController(controller: ConstructorController) {
+		const key = getRouteAttributesKey(controller);
+		const RouteSettings = controller.prototype[key];
+		if (!RouteSettings) return;
+
+		const rootPath = RouteSettings[ROOT_ATTRIBUTES] || "";
+
+		for (const key in RouteSettings) {
+			if (key == ROOT_ATTRIBUTES) continue;
+			const routeDesc = RouteSettings[key];
+			try {
+				const routeinfo = {
+					method: routeDesc.method || "all",
+					path: rootPath + (routeDesc.path || "")
+				};
+				this.registerRoute(
+					routeDesc.name,
+					new Route(routeinfo, controller, key)
+				)
+				Logger.debug(routeinfo, `Register route ${routeDesc.name}`);
+			} catch (e) {
+				Logger.error(e);
+			}
+		}
 	}
 
 	public getRoute(request: Request): Route | undefined {
