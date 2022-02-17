@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import glob from "fast-glob";
-import { Logger } from "..";
+import Logger from "../utils/Logger";
 import normalize from "../utils/normalize";
 import { SingleOrArr } from "../utils/SingleOrArr";
 

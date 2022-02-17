@@ -1,4 +1,3 @@
-import RouteMethods from "../Router/RouteMethods";
 import { Headers } from "../utils/Header";
 
 export default interface Request {

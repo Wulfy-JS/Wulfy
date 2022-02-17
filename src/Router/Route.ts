@@ -3,7 +3,6 @@ import Request from "../Request/Request";
 import Response from "../Response/Response";
 import RouteInfo from "./RouteInfo";
 import ptr from "path-to-regexp";
-import Logger from "../utils/Logger";
 import { ListServices } from "../Service/Service";
 
 

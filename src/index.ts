@@ -8,12 +8,17 @@ import Route from "./Router/Route.dec";
 import RouteMethods from "./Router/RouteMethods";
 import Logger from "./utils/Logger";
 import Request from "./Request/Request";
+import Model from "./Model/Model";
+import Service from "./Service/Service";
 // export default Core;
 
 
 export {
 	Core,
+
 	Controller,
+	Model,
+	Service,
 
 	RouteMethods,
 	Route,

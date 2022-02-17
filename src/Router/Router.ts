@@ -3,7 +3,7 @@ import Route from "./Route";
 import "../utils/Map.ext"
 import { ConstructorController } from "../Controller/Controller";
 import { getRouteAttributesKey, ROOT_ATTRIBUTES } from "./Route.dec";
-import { Logger } from "..";
+import Logger from "../utils/Logger";
 
 export default class Router {
 	private routes: Map<string, Route> = new Map();

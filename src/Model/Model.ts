@@ -1,5 +1,5 @@
 import s, { ModelStatic, ModelCtor, ModelAttributes, InitOptions, Sequelize, BelongsToOptions, BelongsToManyOptions, HasOneOptions, HasManyOptions } from "sequelize";
-import { Logger } from "..";
+import Logger from "../utils/Logger";
 // const { Model } = s;
 // type Model<A extends {} = any, B extends {} = A> = sequelize.Model<A, B>;
 type BelongsTo<S extends s.Model = s.Model, T extends s.Model = s.Model> = s.BelongsTo<S, T>;
