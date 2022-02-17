@@ -14,20 +14,9 @@ import DotEnv from "../utils/DotEnv";
 import Model from "../Model/Model";
 import { ListServices } from "../Service/Service";
 import NunjucksService from "../Service/NunjucksService";
+import Config from "./Config";
 
-interface Config {
-	/** 
-	 * Root path
-	 * @default process.cwd()
-	 */
-	root: string;
 
-	/** 
-	 * Root path
-	 * @default process.cwd()
-	 */
-	controllers: SingleOrArr<string>;
-}
 
 abstract class Core {
 	private static _root = normalize(process.cwd() + "/");
