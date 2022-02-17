@@ -74,7 +74,8 @@ class HttpCore extends Core {
 
 	protected configure() {
 		return {
-			root: "./dist/test"
+			root: "./dist/test",
+			views: "../../src/test/view"
 		}
 	}
 }
