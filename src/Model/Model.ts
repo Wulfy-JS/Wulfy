@@ -177,7 +177,8 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 		}
 
 		this._sequelize = new s.Sequelize(process.env.DATABASE_URL, {
-			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+			logging: Logger.debug.bind(Logger)
 		});
 
 		switch (process.env.DATABASE_MODE) {
