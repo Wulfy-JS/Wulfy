@@ -4,10 +4,10 @@ import { Readable } from "stream";
 
 import Response from "./Response";
 import { Headers } from "../utils/Header";
-
+type Encoding = BufferEncoding | null;
 export default class FileResponse extends Response<Readable> {
 	private _mime: string = "text/plain";
-	private _encoding: BufferEncoding = "utf-8";
+	private _encoding: Encoding = null;
 
 	public setMime(mime: string) {
 		this._mime = mime;
@@ -16,7 +16,7 @@ export default class FileResponse extends Response<Readable> {
 	public getMime() {
 		return this._mime;
 	}
-	public setEncoding(encoding: BufferEncoding) {
+	public setEncoding(encoding: Encoding) {
 		this._encoding = encoding;
 		return this;
 	}
@@ -30,9 +30,9 @@ export default class FileResponse extends Response<Readable> {
 		return Object.assign(super.getHeaders(), { "content-type": type });
 	}
 
-	public setFile(path: string, encoding: BufferEncoding = "utf-8") {
+	public setFile(path: string, encoding: Encoding = null) {
 		return this.setMime(mime.getType(path) || "text/plain")
 			.setEncoding(encoding)
-			.setContent(createReadStream(path, { encoding }));
+			.setContent(createReadStream(path, encoding ? { encoding } : undefined));
 	}
 }
