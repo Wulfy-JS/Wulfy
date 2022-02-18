@@ -3,7 +3,7 @@ import Request from "../Request/Request";
 import RouteMethods from "./RouteMethods"
 import FileResponse from "../Response/FileResponse";
 import normalize from "../utils/normalize";
-import { existsSync as exists } from "fs";
+import { existsSync as exists, statSync as stat } from "fs";
 
 class StaticRouter {
 	private routes: Map<string, string> = new Map();
@@ -41,7 +41,7 @@ class StaticRouter {
 		if (!folders) return;
 		for (const folder of folders) {
 			const path = normalize(Core.rootPath + "/" + folder.path + "/" + url.replace(folder.url, ""));
-			if (!exists(path)) continue;
+			if (!exists(path) || !(stat(path).isFile())) continue;
 
 			return new FileResponse()
 				.setFile(path);
