@@ -65,7 +65,7 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 	private static _init() {
 		if (this._setupData.init) {
 			//@ts-ignore
-			Model.init.bind(this)(this._setupData.init.attributes, { ...this._setupData.init.options, sequelize: this._sequelize });
+			s.Model.init.bind(this)(this._setupData.init.attributes, { ...this._setupData.init.options, sequelize: this._sequelize });
 			//@ts-ignore
 			this._setupData.init = null;
 		}
@@ -92,7 +92,7 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 		//@ts-ignore
 		while (item = this._setupData.belongsTo.shift()) {
 			//@ts-ignore
-			Model.belongsTo.bind(this)(item.target, item.options);
+			s.Model.belongsTo.bind(this)(item.target, item.options);
 		}
 	}
 
@@ -117,7 +117,7 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 		//@ts-ignore
 		while (item = this._setupData.belongsToMany.shift()) {
 			//@ts-ignore
-			Model.belongsToMany.bind(this)(item.target, item.options);
+			s.Model.belongsToMany.bind(this)(item.target, item.options);
 		}
 	}
 
@@ -141,7 +141,7 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 		//@ts-ignore
 		while (item = this._setupData.hasOne.shift()) {
 			//@ts-ignore
-			Model.hasOne.bind(this)(item.target, item.options);
+			s.Model.hasOne.bind(this)(item.target, item.options);
 		}
 	}
 
@@ -165,7 +165,7 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 		//@ts-ignore
 		while (item = this._setupData.hasMany.shift()) {
 			//@ts-ignore
-			Model.hasMany.bind(this)(item.target, item.options);
+			s.Model.hasMany.bind(this)(item.target, item.options);
 		}
 	}
 
