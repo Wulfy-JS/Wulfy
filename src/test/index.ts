@@ -1,3 +1,3 @@
 import HTTPCore from "./HTTPCore";
 
-new HTTPCore().start();
+new HTTPCore().setStatic("/", "../../src/test/public").start();

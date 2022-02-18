@@ -15,6 +15,8 @@ import ServicesLoader from "../Loader/ServicesLoader";
 
 import { ConstructorController } from "../Controller/Controller";
 import { ConstructorService, ListServices } from "../Service/Service";
+import { FileResponse, RouteMethods } from "..";
+import StaticRouter from "../Router/StaticRouter";
 
 
 
@@ -33,6 +35,7 @@ abstract class Core {
 	}
 
 	private router: Router = new Router();
+	private staticRouter: StaticRouter = new StaticRouter();
 	private controllersLoader = new ControllersLoader();
 	private servicesLoader = new ServicesLoader();
 
@@ -47,6 +50,11 @@ abstract class Core {
 			return new RawResponse().setStatus(500);
 		}
 
+		const _static = this.getStatic(request);
+		if (_static)
+			return _static;
+
+
 		const route = this.getRoute(request);
 		if (!route) {
 			return new RawResponse().setStatus(404);
@@ -58,6 +66,15 @@ abstract class Core {
 			Logger.error(e);
 			return new RawResponse().setStatus(500);
 		}
+	}
+
+	public getStatic(request: Request): FileResponse | undefined {
+		return this.staticRouter.getFileResponse(request);
+	}
+
+	public setStatic(url: string, path: string): this {
+		this.staticRouter.register(url, path);
+		return this;
 	}
 
 	/**

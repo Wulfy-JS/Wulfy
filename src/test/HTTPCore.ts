@@ -45,9 +45,9 @@ class HttpCore extends Core {
 						content.pipe(res);
 					} else {
 						res.write(content);
+						res.end();
 					}
 				}
-				res.end();
 				Logger.info(`${request.method} ${request.path} HTTP/${req.httpVersion} ${res.statusCode} ${req.headers['user-agent'] || "-"}`);
 			})
 		})
