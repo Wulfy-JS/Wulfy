@@ -1,10 +1,12 @@
-import Request from "../Request/Request";
 import FileResponse from "../Response/FileResponse";
 import JsonResponse from "../Response/JsonResponse";
-import Response from "../Response/Response";
 import RawResponse from "../Response/RawResponse";
+import Response from "../Response/Response";
+import Request from "../Request/Request";
+
 import { Headers } from "../utils/Header";
 import { ListServices } from "../Service/Service";
+
 const symbol = Symbol.for("Wulfy.Controller");
 
 export default abstract class Controller {

@@ -1,7 +1,8 @@
+import mime from "mime";
 import { createReadStream } from "fs";
 import { Readable } from "stream";
+
 import Response from "./Response";
-import mime from "mime";
 import { Headers } from "../utils/Header";
 
 export default class FileResponse extends Response<Readable> {

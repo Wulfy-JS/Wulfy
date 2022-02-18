@@ -1,8 +1,9 @@
 import nunjucks from "nunjucks";
+
 import Config from "../Core/Config";
 import Core from "../Core/Core";
-import RawResponse from "../Response/RawResponse";
 import normalize from "../utils/normalize";
+import RawResponse from "../Response/RawResponse";
 import Service from "./Service";
 
 class NunjucksService extends Service {

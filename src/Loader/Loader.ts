@@ -1,7 +1,9 @@
 import EventEmitter from "events";
 import glob from "fast-glob";
+
 import Logger from "../utils/Logger";
 import normalize from "../utils/normalize";
+
 import { SingleOrArr } from "../utils/SingleOrArr";
 
 abstract class Loader<T> extends EventEmitter {

@@ -1,5 +1,5 @@
-import Service, { ConstructorService } from "../Service/Service";
 import Loader from "./Loader";
+import Service, { ConstructorService } from "../Service/Service";
 
 class ServicesLoader extends Loader<ConstructorService> {
 	protected condition(obj: ConstructorService): boolean {
