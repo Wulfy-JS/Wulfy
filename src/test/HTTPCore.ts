@@ -40,13 +40,11 @@ class HttpCore extends Core {
 
 				res.statusCode = response.getStatus();
 				const content = response.getContent();
-				if (content) {
-					if (content instanceof Readable) {
-						content.pipe(res);
-					} else {
-						res.write(content);
-						res.end();
-					}
+				if (content && content instanceof Readable) {
+					content.pipe(res);
+				} else {
+					if (content) res.write(content);
+					res.end();
 				}
 				Logger.info(`${request.method} ${request.path} HTTP/${req.httpVersion} ${res.statusCode} ${req.headers['user-agent'] || "-"}`);
 			})

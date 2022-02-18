@@ -4,6 +4,7 @@ import RouteMethods from "./RouteMethods"
 import FileResponse from "../Response/FileResponse";
 import normalize from "../utils/normalize";
 import { existsSync as exists, statSync as stat } from "fs";
+import { URL } from "url";
 
 class StaticRouter {
 	private routes: Map<string, string> = new Map();
@@ -34,8 +35,9 @@ class StaticRouter {
 		const requestMethod = request.method.toUpperCase();
 		if (requestMethod !== RouteMethods.GET && requestMethod !== RouteMethods.HEAD) return;
 
-		let url = request.path;
+		let url = new URL(request.path, "http://localhost/").pathname;
 		if (!url.startsWith("/")) url = "/" + url;
+
 
 		const folders = this.findRoutes(url);
 		if (!folders) return;
