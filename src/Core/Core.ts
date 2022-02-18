@@ -1,3 +1,6 @@
+import nunjucks from "nunjucks";
+import { readFileSync as readFile } from "fs";
+
 import Config from "./Config";
 import ControllersLoader from "../Loader/ControllersLoader";
 import DotEnv from "../utils/DotEnv";
@@ -15,9 +18,8 @@ import ServicesLoader from "../Loader/ServicesLoader";
 
 import { ConstructorController } from "../Controller/Controller";
 import { ConstructorService, ListServices } from "../Service/Service";
-import { FileResponse, RouteMethods } from "..";
+import { FileResponse } from "..";
 import StaticRouter from "../Router/StaticRouter";
-
 
 
 abstract class Core {
@@ -28,6 +30,8 @@ abstract class Core {
 	private static get wulfyPath() {
 		return normalize(import.meta.url + "/../../../");
 	};
+
+	private static errorTemplate = nunjucks.compile(readFile(Core.wulfyPath + "/views/error.njk", { encoding: "utf-8" }));
 
 	public constructor() {
 		DotEnv.init();
@@ -57,15 +61,36 @@ abstract class Core {
 
 		const route = this.getRoute(request);
 		if (!route) {
-			return new RawResponse().setStatus(404);
+			return this.getErrorResponse({
+				error: new ReferenceError(`Route "${request.method.toUpperCase()}: ${request.path}" not found.`),
+				message: "The file was not found :("
+			}, 404);
 		}
 
 		try {
 			return await route.getResponse(this.services, request);
-		} catch (e) {
-			Logger.error(e);
-			return new RawResponse().setStatus(500);
+		} catch (error) {
+			if (!(error instanceof Error))
+				error = new Error((<any>error).toString());
+
+			Logger.error(error);
+			return this.getErrorResponse({
+				error: <Error>error,
+				message: "Something happened and the app broke :("
+			});
 		}
+	}
+
+
+	protected async getErrorResponse(context: { error: Error, message?: string, code?: number }, status: number = 500) {
+		return new RawResponse()
+			.setStatus(status)
+			.setContent(await Core.errorTemplate.render({
+				dev: process.env.MODE == "dev",
+				error: context.error,
+				message: context.message || context.error.message,
+				code: context.code || status,
+			}));
 	}
 
 	public getStatic(request: Request): FileResponse | undefined {
