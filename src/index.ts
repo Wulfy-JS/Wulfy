@@ -4,7 +4,7 @@ import FileResponse from "./Response/FileResponse";
 import JsonResponse from "./Response/JsonResponse";
 import Logger from "./utils/Logger";
 import Model from "./Model/Model";
-import Response from "./Response/Response";
+import NunjucksService from "./Service/NunjucksService";
 import RawResponse from "./Response/RawResponse";
 import Response from "./Response/Response";
 import Request from "./Request/Request";
@@ -32,5 +32,7 @@ export {
 	JsonResponse,
 	FileResponse,
 
-	Logger
+	Logger,
+
+	NunjucksService
 }
