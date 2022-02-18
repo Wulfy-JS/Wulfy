@@ -5,6 +5,7 @@ import Request from "../Request/Request";
 import RouteInfo from "./RouteInfo";
 import { ConstructorController, ControllerHandler } from "../Controller/Controller";
 import { ListServices } from "../Service/Service";
+import { URL } from "url";
 
 
 class Route {
@@ -28,7 +29,7 @@ class Route {
 			return false;
 
 
-		const _match = ptr.match<NodeJS.Dict<string>>(this.routeinfo.path)(request.path);
+		const _match = ptr.match<NodeJS.Dict<string>>(this.routeinfo.path)(new URL(request.path, "http://localhost/").pathname);
 		if (!_match) return false;
 
 		return _match.params || false;
