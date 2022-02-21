@@ -31,7 +31,7 @@ abstract class Loader<T> extends EventEmitter {
 			else
 				modules.push(path);
 		}
-		console.log("Test", modules, paths)
+
 		return Promise.all([
 			this.loadFromFiles(paths, root),
 			this.loadFromModules(modules)
