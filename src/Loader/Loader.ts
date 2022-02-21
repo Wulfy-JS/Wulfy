@@ -1,5 +1,6 @@
 import EventEmitter from "events";
 import glob from "fast-glob";
+import { readFile } from "fs/promises";
 
 import Logger from "../utils/Logger";
 import normalize from "../utils/normalize";
@@ -16,20 +17,69 @@ abstract class Loader<T> extends EventEmitter {
 	}
 
 	protected abstract condition(obj: T): boolean;
+	protected abstract packageProperty(): string;
 
-	public async load(globs: SingleOrArr<string>) {
-		await Promise.all(
-			(await glob(globs, { cwd: this.root }))
+	public load(globs: SingleOrArr<string>, root: string = this.root) {
+		if (!Array.isArray(globs)) globs = [globs];
+
+		const paths = [];
+		const modules = [];
+
+		for (const path of globs) {
+			if (/^[./\\]/.test(path))
+				paths.push(path);
+			else
+				modules.push(path);
+		}
+		console.log("Test", modules, paths)
+		return Promise.all([
+			this.loadFromFiles(paths, root),
+			this.loadFromModules(modules)
+		])
+	}
+
+	private async loadFromModules(modules: string[]) {
+		return Promise.all(modules.map(async module => {
+			if (!import.meta.resolve) return false;
+
+			const path = await import.meta.resolve(module);
+			const match = path.match(new RegExp("^(?:file:\/\/)?((?:.*)\\/" + module + "\\/)", "i"));
+			if (!match) return false;
+			const rootPath = match[1];
+
+			const pakage = JSON.parse(await readFile(rootPath + "package.json", { encoding: "utf-8" }));;
+			if (!pakage.wulfy) {
+				Logger.warn(`Module ${module} not have configurate wulfy. Load from main.`)
+				return this.loadModule(module);
+			}
+
+			const prop = this.packageProperty();
+			const paths = pakage.wulfy[prop];
+			if (!paths) {
+				Logger.warn(`Module ${module} not have property ${prop}. Load from main.`);
+				return this.loadModule(module);
+			}
+
+			return this.loadFromFiles(paths, rootPath);
+		}));
+	}
+
+	private async loadFromFiles(globs: string[], root: string = this.root) {
+		return Promise.all(
+			(await glob(globs, { cwd: root }))
 				.map(path => {
-					path = normalize(this.root + path);
+					path = normalize(root + path);
 					if (!path.endsWith(".js")) return Logger.warn(`File ${path} is not JavaScript file.`);
 
-					return this.loadModule(path);
+					/* 
+						"file://" + path
+					*/
+					return this.loadModuleFromFile(path);
 				})
 		);
 	}
 
-	private async loadModule(path: string): Promise<void> {
+	private async loadModuleFromFile(path: string): Promise<void> {
 		const controller = (await <Promise<{ default: T }>>import("file://" + path)).default;
 
 		if (!controller) {
@@ -43,6 +93,22 @@ abstract class Loader<T> extends EventEmitter {
 		}
 
 		this.emit("load", controller, path);
+	}
+
+	private async loadModule(module: string): Promise<void> {
+		const controller = (await <Promise<{ default: T }>>import(module)).default;
+
+		if (!controller) {
+			Logger.warn(`Module ${module} does not export anything by default`);
+			return;
+		}
+
+		if (!this.condition(controller)) {
+			Logger.warn(`export default of the module ${module} failed condition`);
+			return;
+		}
+
+		this.emit("load", controller, module);
 	}
 }
 
