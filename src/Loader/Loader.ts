@@ -71,9 +71,6 @@ abstract class Loader<T> extends EventEmitter {
 					path = normalize(root + path);
 					if (!path.endsWith(".js")) return Logger.warn(`File ${path} is not JavaScript file.`);
 
-					/* 
-						"file://" + path
-					*/
 					return this.loadModuleFromFile(path);
 				})
 		);
@@ -87,28 +84,51 @@ abstract class Loader<T> extends EventEmitter {
 			return;
 		}
 
-		if (!this.condition(controller)) {
-			Logger.warn(`export default of the file ${path} failed condition`);
-			return;
-		}
 
-		this.emit("load", controller, path);
+		if (Array.isArray(controller)) {
+			controller.forEach((controller, index) => {
+				if (!this.condition(controller)) {
+					Logger.warn(`export default of the file ${path}[${index}] failed condition`);
+					return;
+				}
+
+				this.emit("load", controller, path);
+			})
+		} else {
+			if (!this.condition(controller)) {
+				Logger.warn(`export default of the file ${path} failed condition`);
+				return;
+			}
+
+			this.emit("load", controller, path);
+		}
 	}
 
 	private async loadModule(module: string): Promise<void> {
-		const controller = (await <Promise<{ default: T }>>import(module)).default;
+		const controller = (await <Promise<{ default: SingleOrArr<T> }>>import(module)).default;
 
 		if (!controller) {
 			Logger.warn(`Module ${module} does not export anything by default`);
 			return;
 		}
 
-		if (!this.condition(controller)) {
-			Logger.warn(`export default of the module ${module} failed condition`);
-			return;
-		}
+		if (Array.isArray(controller)) {
+			controller.forEach((controller, index) => {
+				if (!this.condition(controller)) {
+					Logger.warn(`export default of the module ${module}[${index}] failed condition`);
+					return;
+				}
 
-		this.emit("load", controller, module);
+				this.emit("load", controller, module);
+			})
+		} else {
+			if (!this.condition(controller)) {
+				Logger.warn(`export default of the module ${module} failed condition`);
+				return;
+			}
+
+			this.emit("load", controller, module);
+		}
 	}
 }
 
