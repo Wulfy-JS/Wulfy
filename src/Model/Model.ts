@@ -181,6 +181,7 @@ abstract class Model<TModelAttributes extends {} = any, TCreationAttributes exte
 			logging: Logger.debug.bind(Logger)
 		});
 
+		process.env.DATABASE_MODE = process.env.DATABASE_MODE || (process.env.MODE == "dev" ? "alter" : "prod");
 		switch (process.env.DATABASE_MODE) {
 			case 'alter':
 			case 'force':
