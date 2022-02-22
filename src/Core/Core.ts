@@ -31,7 +31,7 @@ abstract class Core {
 		return normalize(import.meta.url + "/../../../");
 	};
 
-	private static errorTemplate = nunjucks.compile(readFile(Core.wulfyPath + "/views/error.njk", { encoding: "utf-8" }));
+	private static errorTemplate = nunjucks.compile(readFile(normalize(Core.wulfyPath + "/views/error.njk"), { encoding: "utf-8" }));
 
 	public constructor() {
 		DotEnv.init();
