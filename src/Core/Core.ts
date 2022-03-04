@@ -28,7 +28,7 @@ abstract class Core {
 		return this._root;
 	}
 	private static get wulfyPath() {
-		return normalize(import.meta.url + "/../../../");
+		return normalize(decodeURI(import.meta.url) + "/../../../");
 	};
 
 	private static errorTemplate = nunjucks.compile(readFile(normalize(Core.wulfyPath + "/views/error.njk"), { encoding: "utf-8" }));
