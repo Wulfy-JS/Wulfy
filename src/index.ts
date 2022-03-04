@@ -8,7 +8,7 @@ import NunjucksService from "./Service/NunjucksService";
 import RawResponse from "./Response/RawResponse";
 import Response from "./Response/Response";
 import Request from "./Request/Request";
-import Route from "./Router/Route.dec";
+import Route from "./Router/Decorator/Route";
 import RouteMethods from "./Router/RouteMethods";
 import Service from "./Service/Service";
 

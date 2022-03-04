@@ -1,6 +1,6 @@
 import Controller from "../../Controller/Controller";
 import RawResponse from "../../Response/RawResponse";
-import Route from "../../Router/Route.dec";
+import Route from "../../Router/Decorator/Route";
 
 class TestController extends Controller {
 	@Route({ name: "TT", path: "/tt" })

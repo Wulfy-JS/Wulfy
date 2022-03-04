@@ -5,7 +5,7 @@ import Request from "../Request/Request";
 import Route from "./Route";
 
 import { ConstructorController } from "../Controller/Controller";
-import { getRouteAttributesKey, ROOT_ATTRIBUTES } from "./Route.dec";
+import { getRouteAttributesKey, ROOT_ATTRIBUTES } from "./Decorator/Route";
 
 export default class Router {
 	private routes: Map<string, Route> = new Map();

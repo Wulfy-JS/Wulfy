@@ -1,7 +1,7 @@
-import Controller from "../Controller/Controller";
-import RouteInfo from "./RouteInfo";
+import Controller from "../../Controller/Controller";
+import RouteInfo from "../RouteInfo";
 
-import { ConstructorController } from "../Controller/Controller";
+import { ConstructorController } from "../../Controller/Controller";
 
 interface RouteOptions extends Partial<RouteInfo> {
 	name: string,
