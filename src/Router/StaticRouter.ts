@@ -42,7 +42,11 @@ class StaticRouter {
 		const folders = this.findRoutes(url);
 		if (!folders) return;
 		for (const folder of folders) {
-			const path = normalize((process.platform == "win32" ? /^[A-Z]\:[\/\\]/.test(folder.path) : folder.path.startsWith("/")) ? folder.path : Core.rootPath + "/" + folder.path + "/" + url.replace(folder.url, ""));
+			const isAbsolute = process.platform == "win32"
+				? /^[A-Z]\:[\/\\]/.test(folder.path)
+				: folder.path.startsWith("/");
+
+			const path = normalize((isAbsolute ? folder.path : Core.rootPath + "/" + folder.path) + "/" + url.replace(folder.url, ""));
 			if (!exists(path) || !(stat(path).isFile())) continue;
 
 			return new FileResponse()
