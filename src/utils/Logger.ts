@@ -4,7 +4,8 @@ import DotEnv from "./DotEnv";
 const Logger = (() => {
 	DotEnv.init();
 	const logger = pino({
-		level: process.env.MODE == "dev" ? "debug" : "info"
+		level: process.env.MODE == "dev" ? "debug" : "info",
+		...(process.env.PINO_TRANSPORT ? { transport: { target: process.env.PINO_TRANSPORT } } : {}),
 	});
 	process.on('uncaughtException', pino.final(logger, (err, finalLogger) => {
 		finalLogger.error(err, 'uncaughtException')
