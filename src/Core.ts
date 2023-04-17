@@ -6,6 +6,9 @@ import { URL } from "url";
 import { IncomingMessage, ServerResponse } from "http";
 import { TLSSocket } from "tls";
 import "reflect-metadata";
+import Router from "./Router";
+import { resolve } from "path";
+import { HttpMethod } from "./Route";
 
 declare module 'http' {
 	interface IncomingMessage {
@@ -21,6 +24,8 @@ const MIN_PORT = 0,
 class Core {
 	private httpServer: Nullable<HttpServer> = null;
 	private httpsServer: Nullable<HttpsServer> = null;
+	private configured: boolean = false;
+	private router: Router = new Router();
 
 	private getPort(ENV_KEY: string, defaultValue: number) {
 		const port = DotEnv.getInt(ENV_KEY, defaultValue);
@@ -59,6 +64,11 @@ class Core {
 		/**
 		 * HTTPS server gives TLS Socket
 		 */
+		const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+		const method = (req.method || 'get').toUpperCase();
+
+		this.router.getRoute(url.pathname, <HttpMethod>method.toUpperCase());
+
 		req.secure = req.socket instanceof TLSSocket ? req.socket.encrypted : false;
 
 		res.write("Hello, World!" + (req.secure ? " You sequred!" : ""));
@@ -74,9 +84,19 @@ class Core {
 		res.end();
 	}
 
-	public start() {
+	public async configure(root: string = process.cwd()) {
+		this.configured = true;
+		await this.router.configure(resolve(root, 'controllers'));
+
+		return this;
+	}
+
+	public async start() {
 		if (this.httpServer !== null || this.httpsServer !== null) return;
 		DotEnv.config();
+
+		if (!this.configured)
+			await this.configure();
 
 		this.httpServer = new HttpServer();
 
@@ -86,12 +106,14 @@ class Core {
 
 		if (canRun) {
 			this.httpsServer = new HttpsServer({ key: key, cert: cert })
-			this.httpsServer.on('request', this.onRequest);
+			this.httpsServer.on('request', (req, res) => this.onRequest(req, res));
 			this.httpsServer.listen(this.getPort("HTTPS_PORT", DEFAULT_HTTPS_PORT));
 		}
 
 		const redirect = canRun && DotEnv.getBoolean("TLS_REDIRECT", false);
-		this.httpServer.on('request', redirect ? this.redirect : this.onRequest);
+		this.httpServer.on('request', (req, res) => {
+			redirect ? this.redirect(req, res) : this.onRequest(req, res)
+		});
 
 		this.httpServer.listen(this.getPort("HTTP_PORT", DEFAULT_HTTP_PORT));
 		return this;

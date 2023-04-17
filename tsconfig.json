@@ -6,12 +6,16 @@
 		"esModuleInterop": true,
 		"declaration": true,
 		"declarationDir": "types",
-		"lib": ["ES2020"],
+		"lib": [
+			"ES2020",
+			"DOM"
+		],
 		"outDir": "dist",
 		"target": "ES2020",
 		"module": "ES2020",
 		"strict": true
 	},
-
-	"include": ["src/**/*"]
+	"include": [
+		"src/**/*"
+	]
 }

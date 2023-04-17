@@ -1,38 +1,40 @@
 import Controller from "./Controller";
+import "reflect-metadata";
+import { resolve } from "path";
 
 type HttpMethod =
 	// The GET method requests a representation of the specified resource. Requests using GET should only retrieve data.
-	"GET" | "get" |
+	"GET" |
 
 	// The HEAD method asks for a response identical to a GET request, but without the response body.
-	"HEAD" | "head" |
+	"HEAD" |
 
 	// The POST method submits an entity to the specified resource, often causing a change in state or side effects on the server.
-	"POST" | "post" |
+	"POST" |
 
 	// The PUT method replaces all current representations of the target resource with the request payload.
-	"PUT" | "put" |
+	"PUT" |
 
 	// The DELETE method deletes the specified resource.
-	"DELETE" | "delete" |
+	"DELETE" |
 
 	// The CONNECT method establishes a tunnel to the server identified by the target resource.
-	"CONNECT" | "connect" |
+	"CONNECT" |
 
 	// The OPTIONS method describes the communication options for the target resource.
-	"OPTIONS" | "options" |
+	"OPTIONS" |
 
 	// The TRACE method performs a message loop-back test along the path to the target resource.
-	"TRACE" | "trace" |
+	"TRACE" |
 
 	// The PATCH method applies partial modifications to a resource.
-	"PATCH" | "patch" |
+	"PATCH" |
 
 	// Allowed all http-methods
-	"ALL" | "all";
+	"ALL";
 
 
-// type HttpMethod = "get" | "post";
+// type HttpMethod = "get";
 
 interface RouteOptions {
 	path: string,
@@ -43,12 +45,41 @@ interface RouteOptions {
 	 */
 	methods?: SingleOrArray<HttpMethod>
 }
-type RouteSettings = Required<RouteOptions>;
+interface RouteSettings {
+	path: string,
+	name: string,
+	methods: HttpMethod[] | "ALL"
+};
+
+interface ControllerSettings extends RouteSettings {
+	routes: NodeJS.Dict<RouteSettings>
+};
+
+function prepareMethods(methods: SingleOrArray<HttpMethod>): HttpMethod[] | "ALL" {
+	if (!Array.isArray(methods)) {
+		if (methods == "ALL")
+			return methods;
+		else
+			methods = [methods];
+	}
+
+	if (methods.indexOf("ALL") != -1)
+		return "ALL";
+
+	return methods;
+}
 // function Route(path: string, name: string, methods?: SingleOrArray<HttpMethod>);
 // function Route(options: RouteOptions);
 function Route(path_or_options: string | RouteOptions, name: string = "", methods: SingleOrArray<HttpMethod> = "ALL") {
-	const options: RouteSettings = Object.assign({ methods: "ALL" }, typeof path_or_options == "string" ? { path: path_or_options, name, methods } : path_or_options);
-	options.methods = (typeof options.methods == "string" ? [options.methods] : options.methods).map(e => <HttpMethod>e.toLowerCase());
+	methods = prepareMethods((typeof path_or_options !== "string" && path_or_options.methods) || methods);
+	name = (typeof path_or_options !== "string" && path_or_options.name) || name;
+	const path = typeof path_or_options === "string" ? path_or_options : path_or_options.path;
+
+	const options: RouteSettings = {
+		methods,
+		name,
+		path
+	};
 
 	return (target: typeof Controller | Controller, propertyKey: string = "") => {
 		if (target instanceof Controller) {
@@ -59,16 +90,46 @@ function Route(path_or_options: string | RouteOptions, name: string = "", method
 	};
 }
 
+const _router = "@router";
+declare global {
+	namespace Reflect {
+		let Controller: string;
+	}
+}
+
+Reflect.Controller = "@controller";
+
 function RouteMethod(target: Controller, method: string, options: RouteSettings) {
-	console.log(`Route method "${method}" in "${target.constructor.name}"`, options)
-	const meta = Reflect.getMetadata("router", target.constructor) || {};
+	const meta = Reflect.getMetadata(_router, target.constructor) || {};
 	meta[method] = options;
-	Reflect.defineMetadata("router", meta, target.constructor);
+	Reflect.defineMetadata(_router, meta, target.constructor);
 }
 function RouteClass(target: typeof Controller, options: RouteSettings) {
-	console.log(`Route class "${target.name}"`, options);
-	Reflect.defineMetadata("controller", options, target);
+	const meta: NodeJS.Dict<RouteSettings> = Reflect.getMetadata(_router, target);
+	const t: ControllerSettings = {
+		...options,
+		routes: {}
+	};
+
+	for (const i in meta) {
+		const route = meta[i];
+		if (!route) continue;
+
+		const path = route.path.startsWith("/") || route.path.startsWith("\\") ? '.' + route.path : route.path;
+		route.path = resolve(t.path, path);
+
+		if (options.methods !== "ALL") {
+			if (route.methods == "ALL") {
+				route.methods = options.methods;
+			} else {
+				route.methods = route.methods.filter(method => options.methods.indexOf(method) != -1)
+			}
+		}
+		t.routes[i] = route;
+	}
+
+	Reflect.defineMetadata(Reflect.Controller, t, target);
 }
 
 export default Route;
-export { HttpMethod };
+export { HttpMethod, ControllerSettings, RouteSettings };

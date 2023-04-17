@@ -24,6 +24,7 @@
   "dependencies": {
     "dotenv": "^16.0.0",
     "fast-glob": "^3.2.11",
+    "glob": "^10.1.0",
     "nunjucks": "^3.2.3",
     "path-to-regexp": "^6.2.0",
     "pino": "^7.6.5",
