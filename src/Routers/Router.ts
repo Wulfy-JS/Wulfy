@@ -61,8 +61,8 @@ class Router {
 				const matches = match(route.path)(path);
 				if (matches === false) continue;
 				const module = await loadModule(controller.path);
-				return (req: IncomingMessage, res: ServerResponse) => {
-					return (new module[controller.export](req, res))[i](matches)
+				return async (req: IncomingMessage, res: ServerResponse) => {
+					return await (new module[controller.export](req, res))[i](matches)
 				}
 			}
 		}

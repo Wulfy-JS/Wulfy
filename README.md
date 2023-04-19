@@ -51,6 +51,7 @@ Example config-file:
 - [ ] Errors Router (from controllers?)
 - [ ] \(???) Services (templates, models, etc.)
 - [ ] External modules
-
+- [ ] Variables for Config-File
+- [ ] CLI
 
 [^1]: Icon download from [svgrepo.con](https://www.svgrepo.com/svg/89615/wolf-head)

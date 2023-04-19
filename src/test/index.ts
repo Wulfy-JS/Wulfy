@@ -1,3 +1,3 @@
-import { Core } from "../index";
+import run from "../index";
 
-new Core().start();
+run();

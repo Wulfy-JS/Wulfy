@@ -13,6 +13,7 @@ import readConfig from "./Config";
 import StaticRouter from "./Routers/StaticRouter";
 import { HttpMethod } from "./Routers/Route";
 import "./utils/HttpExtend";
+import HttpError from "./HttpError";
 
 const MIN_PORT = 0,
 	MAX_PORT = 65535,
@@ -25,6 +26,11 @@ class Core {
 	private configured: boolean = false;
 	private router: Router = new Router();
 	private staticRouter: StaticRouter = new StaticRouter();
+	private constructor() {
+		process.on("SIGINT", () => {
+			this.stop();
+		});
+	}
 
 	private getPort(ENV_KEY: string, defaultValue: number) {
 		const port = DotEnv.getInt(ENV_KEY, defaultValue);
@@ -59,6 +65,21 @@ class Core {
 		return readFileSync(key_file).toString();
 	}
 
+	private onError(req: IncomingMessage, res: ServerResponse, error: any) {
+		if (!(error instanceof HttpError)) {
+			if (error instanceof Error)
+				error = new HttpError(error.message);
+			else if (typeof error != "object")
+				error = new HttpError(error.toString(), 500);
+			else
+				error = new HttpError(JSON.stringify(error), 500);
+		}
+
+		res.statusCode = error.code;
+		res.write(error.message || "Internal Server Error");
+		res.end()
+	}
+
 	private async onRequest(req: IncomingMessage, res: ServerResponse) {
 		/**
 		 * HTTPS server gives TLS Socket
@@ -68,7 +89,14 @@ class Core {
 		const method = (req.method || 'get').toUpperCase();
 
 		const controller = await this.router.getRoute(url.pathname, <HttpMethod>method.toUpperCase());
-		if (controller !== false) return controller(req, res);
+		if (controller !== false) {
+			try {
+				await controller(req, res);
+			} catch (e) {
+				this.onError(req, res, e);
+			}
+			return;
+		}
 
 		if (method == "GET" || method == "HEAD") {
 			const file = this.staticRouter.getRoute(url.pathname);
@@ -76,9 +104,7 @@ class Core {
 		}
 
 		//Error 404
-
-		res.write("404 Not Found!" + (req.secure ? " You sequred!" : ""));
-		res.end();
+		this.onError(req, res, new HttpError("Not Found", 404));
 	}
 
 	private redirect(req: IncomingMessage, res: ServerResponse) {
@@ -146,6 +172,14 @@ class Core {
 		await this.stop();
 		return await this.start();
 	}
+
+	private static instance: Nullable<Core> = null;
+	public static getInstance(): Core {
+		if (this.instance === null)
+			this.instance = new Core();
+		return this.instance;
+	}
+
 }
 
 export default Core;

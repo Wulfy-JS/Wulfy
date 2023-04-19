@@ -1,4 +1,4 @@
-import { Controller, Route } from "../../index";
+import { Controller, HttpError, Route } from "../../index";
 
 @Route("/", "index")
 class IndexController extends Controller {
@@ -19,6 +19,11 @@ class TestController extends Controller {
 	@Route({ name: "test_asd", path: '/asd', methods: ['GET', 'PATCH'] })
 	public test() {
 		this.text("Hello, Test 2!");
+	}
+
+	@Route({ name: "error", path: '/error', methods: ['GET'] })
+	public error() {
+		throw new HttpError("Oops...");
 	}
 }
 class TestClass {
