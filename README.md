@@ -25,7 +25,7 @@ CONFIG_FILE = "path/to/config.json"
 ```
 
 # Config
-```json
+```jsonc
 {
 	//Path to controllers
 	"controllers": [
