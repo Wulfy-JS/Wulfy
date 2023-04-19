@@ -1,49 +1,70 @@
 import { glob } from "glob";
-import { resolve } from "path";
 import { match } from "path-to-regexp";
-import { ControllerSettings, HttpMethod, RouteSettings } from "./Route";
+import { ControllerMeta, HttpMethod } from "./Route";
+import loadModule from "./utils/loadModule";
+import { IncomingMessage, ServerResponse } from "http";
+
+interface RouterControllerMeta {
+	meta: ControllerMeta;
+	export: string;
+	path: string;
+}
+
 
 class Router {
 	//list[url_path] = controller_path;
-	private list: Map<ControllerSettings, string> = new Map();
+	private list: Set<RouterControllerMeta> = new Set();
 
-	public async configure(path: string) {
-		const files = await glob(resolve(path, "**/*.js"));
-		files.forEach(file => this.loadController(file))
-		console.log(files);
+	public async configure(paths: string[]) {
+		this.list.clear();
+
+		paths = paths.map(e => {
+			if (e.endsWith(".js")) return e;
+			if (e.endsWith("**")) return e + "/*.js";
+			if (e.endsWith("*")) return e + ".js";
+			if (e.endsWith("/") || e.endsWith("\\")) return e + "**/*.js";
+			return e + "/**/*.js";
+
+		})
+		const files = await glob(paths, { windowsPathsNoEscape: true });
+		await Promise.all(files.map(file => this.loadController(file)));
 	}
 
 	public async loadController(path: string) {
-		const module = await import(path);
+		const module = await loadModule(path);
 		for (const name in module) {
 			const controller = module[name];
 			if (typeof controller !== "function") continue;
-			const controllerMeta: Undefined<ControllerSettings> = Reflect.getMetadata(Reflect.Controller, controller);
+			const controllerMeta: Undefined<ControllerMeta> = Reflect.getMetadata(Reflect.Controller, controller);
 			if (!controllerMeta) continue;
-			this.list.set(controllerMeta, path);
+			this.list.add({
+				meta: controllerMeta,
+				export: name,
+				path
+			});
 		}
 	}
 
 	public async getRoute(path: string, method: HttpMethod) {
-		console.log({ path, method })
-		for (const [controller, controllerPath] of this.list.entries()) {
-			if (controller.methods != "ALL" && controller.methods.indexOf(method) == -1)
+		for (const [, controller] of this.list.entries()) {
+			if (controller.meta.methods != "ALL" && controller.meta.methods.indexOf(method) == -1)
 				continue;
-			if (!path.startsWith(controller.path))
+			if (!path.startsWith(controller.meta.path))
 				continue;
-			console.log("Controller:", controller)
-			for (const i in controller.routes) {
-				const route = controller.routes[i];
+			for (const i in controller.meta.routes) {
+				const route = controller.meta.routes[i];
 				if (!route) continue;
 				if (route.methods != "ALL" && route.methods.indexOf(method) == -1)
 					continue;
-				console.log("Route:", route);
-
 				const matches = match(route.path)(path);
 				if (matches === false) continue;
-				// return await import(path)
+				const module = await loadModule(controller.path);
+				return (req: IncomingMessage, res: ServerResponse) => {
+					return (new module[controller.export](req, res))[i](matches)
+				}
 			}
 		}
+		return false;
 	}
 }
 

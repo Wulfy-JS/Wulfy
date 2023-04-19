@@ -1,0 +1,8 @@
+{
+	"controllers": [
+		"dist/test/controllers"
+	],
+	"static": {
+		"/": "public"
+	}
+}

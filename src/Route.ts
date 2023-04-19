@@ -1,6 +1,6 @@
 import Controller from "./Controller";
 import "reflect-metadata";
-import { resolve } from "path";
+import { resolve } from "path/posix";
 
 type HttpMethod =
 	// The GET method requests a representation of the specified resource. Requests using GET should only retrieve data.
@@ -45,14 +45,14 @@ interface RouteOptions {
 	 */
 	methods?: SingleOrArray<HttpMethod>
 }
-interface RouteSettings {
+interface RouteMeta {
 	path: string,
 	name: string,
 	methods: HttpMethod[] | "ALL"
 };
 
-interface ControllerSettings extends RouteSettings {
-	routes: NodeJS.Dict<RouteSettings>
+interface ControllerMeta extends RouteMeta {
+	routes: NodeJS.Dict<RouteMeta>
 };
 
 function prepareMethods(methods: SingleOrArray<HttpMethod>): HttpMethod[] | "ALL" {
@@ -75,7 +75,7 @@ function Route(path_or_options: string | RouteOptions, name: string = "", method
 	name = (typeof path_or_options !== "string" && path_or_options.name) || name;
 	const path = typeof path_or_options === "string" ? path_or_options : path_or_options.path;
 
-	const options: RouteSettings = {
+	const options: RouteMeta = {
 		methods,
 		name,
 		path
@@ -99,14 +99,14 @@ declare global {
 
 Reflect.Controller = "@controller";
 
-function RouteMethod(target: Controller, method: string, options: RouteSettings) {
+function RouteMethod(target: Controller, method: string, options: RouteMeta) {
 	const meta = Reflect.getMetadata(_router, target.constructor) || {};
 	meta[method] = options;
 	Reflect.defineMetadata(_router, meta, target.constructor);
 }
-function RouteClass(target: typeof Controller, options: RouteSettings) {
-	const meta: NodeJS.Dict<RouteSettings> = Reflect.getMetadata(_router, target);
-	const t: ControllerSettings = {
+function RouteClass(target: typeof Controller, options: RouteMeta) {
+	const meta: NodeJS.Dict<RouteMeta> = Reflect.getMetadata(_router, target);
+	const t: ControllerMeta = {
 		...options,
 		routes: {}
 	};
@@ -132,4 +132,4 @@ function RouteClass(target: typeof Controller, options: RouteSettings) {
 }
 
 export default Route;
-export { HttpMethod, ControllerSettings, RouteSettings };
+export { HttpMethod, ControllerMeta, RouteMeta };

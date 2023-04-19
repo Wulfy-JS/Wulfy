@@ -6,15 +6,11 @@ import { URL } from "url";
 import { IncomingMessage, ServerResponse } from "http";
 import { TLSSocket } from "tls";
 import "reflect-metadata";
+import "./utils/HttpExtend";
 import Router from "./Router";
-import { resolve } from "path";
 import { HttpMethod } from "./Route";
-
-declare module 'http' {
-	interface IncomingMessage {
-		secure?: boolean;
-	}
-}
+import readConfig from "./Config";
+import StaticRouter from "./StaticRouter";
 
 const MIN_PORT = 0,
 	MAX_PORT = 65535,
@@ -26,6 +22,7 @@ class Core {
 	private httpsServer: Nullable<HttpsServer> = null;
 	private configured: boolean = false;
 	private router: Router = new Router();
+	private staticRouter: StaticRouter = new StaticRouter();
 
 	private getPort(ENV_KEY: string, defaultValue: number) {
 		const port = DotEnv.getInt(ENV_KEY, defaultValue);
@@ -60,18 +57,25 @@ class Core {
 		return readFileSync(key_file).toString();
 	}
 
-	private onRequest(req: IncomingMessage, res: ServerResponse) {
+	private async onRequest(req: IncomingMessage, res: ServerResponse) {
 		/**
 		 * HTTPS server gives TLS Socket
 		 */
+		req.secure = req.socket instanceof TLSSocket ? req.socket.encrypted : false;
 		const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 		const method = (req.method || 'get').toUpperCase();
 
-		this.router.getRoute(url.pathname, <HttpMethod>method.toUpperCase());
+		const controller = await this.router.getRoute(url.pathname, <HttpMethod>method.toUpperCase());
+		if (controller !== false) return controller(req, res);
 
-		req.secure = req.socket instanceof TLSSocket ? req.socket.encrypted : false;
+		if (method == "GET" || method == "HEAD") {
+			const file = this.staticRouter.getRoute(url.pathname);
+			if (file) return file(req, res);
+		}
 
-		res.write("Hello, World!" + (req.secure ? " You sequred!" : ""));
+		//Error 404
+
+		res.write("404 Not Found!" + (req.secure ? " You sequred!" : ""));
 		res.end();
 	}
 
@@ -84,9 +88,13 @@ class Core {
 		res.end();
 	}
 
-	public async configure(root: string = process.cwd()) {
+	public async configure() {
 		this.configured = true;
-		await this.router.configure(resolve(root, 'controllers'));
+
+		const cfg = readConfig();
+
+		await this.router.configure(cfg.controllers);
+		this.staticRouter.configure(cfg.static);
 
 		return this;
 	}
@@ -119,17 +127,22 @@ class Core {
 		return this;
 	}
 
-	public stop() {
-		this.httpServer?.close();
-		this.httpsServer?.close();
+	public async stop() {
+		await Promise.all(
+			[
+				new Promise<void>(r => this.httpServer === null ? r() : this.httpServer.close(() => r())),
+				new Promise<void>(r => this.httpsServer === null ? r() : this.httpsServer.close(() => r())),
+			]
+		)
 
 		this.httpServer = null;
 		this.httpsServer = null;
 		return this;
 	}
 
-	public restart() {
-		return this.stop().start();
+	public async restart() {
+		await this.stop();
+		return await this.start();
 	}
 }
 

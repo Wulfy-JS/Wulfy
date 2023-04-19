@@ -1,5 +1,4 @@
-import Controller from "../../Controller";
-import Route from "../../Route";
+import { Controller, Route } from "../../index";
 
 @Route("/", "index")
 class IndexController extends Controller {
@@ -12,16 +11,14 @@ class IndexController extends Controller {
 
 @Route("/test", "test", 'GET')
 class TestController extends Controller {
-	@Route({ name: "index", path: '/asd', methods: 'ALL' })
+	@Route({ name: "index", path: '', methods: 'ALL' })
 	public index() {
-		this.response.write("Hello, Test!" + (this.request.secure ? " You sequre!" : ""));
-		this.response.end();
+		this.json({ test: 1 });
 	}
 
-	@Route({ name: "test", path: '/asdaaas', methods: ['GET', 'PATCH'] })
+	@Route({ name: "test_asd", path: '/asd', methods: ['GET', 'PATCH'] })
 	public test() {
-		this.response.write("Hello, Test!" + (this.request.secure ? " You sequre!" : ""));
-		this.response.end();
+		this.text("Hello, Test 2!");
 	}
 }
 class TestClass {

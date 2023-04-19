@@ -75,6 +75,8 @@ typings/
 # FuseBox cache
 .fusebox/
 
+# Project
 dist
 types
 sec
+.env
