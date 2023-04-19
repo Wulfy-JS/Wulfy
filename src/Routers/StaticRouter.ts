@@ -1,6 +1,7 @@
 import { createReadStream, existsSync } from "fs";
 import { resolve } from "path";
 import { IncomingMessage, ServerResponse } from "http";
+
 import mime from "mime";
 
 type StaticRouterConfig = NodeJS.Dict<string[]>;

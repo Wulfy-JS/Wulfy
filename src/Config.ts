@@ -1,6 +1,7 @@
-import { existsSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
+import { isAbsolute, resolve } from "path";
+
 import DotEnv from "./utils/DotEnv";
-import path, { isAbsolute, resolve } from "path";
 
 type RawControllerConfig = Undefined<SingleOrArray<string>>;
 type ControllerConfig = string[];

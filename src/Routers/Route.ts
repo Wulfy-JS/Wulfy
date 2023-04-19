@@ -1,6 +1,8 @@
-import Controller from "./Controller";
-import "reflect-metadata";
 import { resolve } from "path/posix";
+
+import "reflect-metadata";
+
+import Controller from "../Controller";
 
 type HttpMethod =
 	// The GET method requests a representation of the specified resource. Requests using GET should only retrieve data.

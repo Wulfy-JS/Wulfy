@@ -1,16 +1,18 @@
 import { existsSync, readFileSync } from "fs";
-import HttpServer from "./Server/HttpServer";
-import HttpsServer from "./Server/HttpsServer";
-import DotEnv from './utils/DotEnv';
 import { URL } from "url";
 import { IncomingMessage, ServerResponse } from "http";
 import { TLSSocket } from "tls";
+
 import "reflect-metadata";
-import "./utils/HttpExtend";
-import Router from "./Router";
-import { HttpMethod } from "./Route";
+
+import HttpServer from "./Server/HttpServer";
+import HttpsServer from "./Server/HttpsServer";
+import DotEnv from './utils/DotEnv';
+import Router from "./Routers/Router";
 import readConfig from "./Config";
-import StaticRouter from "./StaticRouter";
+import StaticRouter from "./Routers/StaticRouter";
+import { HttpMethod } from "./Routers/Route";
+import "./utils/HttpExtend";
 
 const MIN_PORT = 0,
 	MAX_PORT = 65535,

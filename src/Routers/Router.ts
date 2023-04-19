@@ -1,8 +1,10 @@
+import { IncomingMessage, ServerResponse } from "http";
+
 import { glob } from "glob";
 import { match } from "path-to-regexp";
+
+import loadModule from "../utils/loadModule";
 import { ControllerMeta, HttpMethod } from "./Route";
-import loadModule from "./utils/loadModule";
-import { IncomingMessage, ServerResponse } from "http";
 
 interface RouterControllerMeta {
 	meta: ControllerMeta;
