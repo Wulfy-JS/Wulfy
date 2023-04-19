@@ -1,4 +1,7 @@
+import { createReadStream, existsSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
+import mime from "mime";
+
 type Header = number | string | string[];
 type Headers = NodeJS.Dict<Header>;
 
@@ -29,6 +32,16 @@ abstract class Controller {
 		});
 		this.response.write(JSON.stringify(data));
 		this.response.end();
+	}
+
+	protected file(path: string, code: number = 200, headers: Headers = {}) {
+		if (!existsSync(path)) throw new ReferenceError("File noty Found");
+
+		this.res.writeHead(code, {
+			...headers,
+			"content-type": mime.getType(path) || "text/plain"
+		})
+		createReadStream(path).pipe(this.res);
 	}
 }
 
