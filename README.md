@@ -29,8 +29,13 @@ CONFIG_FILE = "path/to/config.json"
 {
 	//Path to controllers
 	"controllers": [
-		"controllers/**/*,js"
-	]
+		"controllers/**/*.js"
+	],
+	//List static dirs
+	"static": {
+		"/starts_url": ["path/to/static/folder1", "path/to/static/folder2"],
+		"/": "public"
+	}
 }
 
 ```
@@ -40,6 +45,7 @@ CONFIG_FILE = "path/to/config.json"
 - [x] Statics Router
 - [ ] Errors Router (from controllers?)
 - [ ] \(???) Services (templates, models, etc.)
+- [ ] External modules
 
 
 [^1]: Icon download from [svgrepo.con](https://www.svgrepo.com/svg/89615/wolf-head)
