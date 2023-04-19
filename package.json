@@ -2,6 +2,12 @@
   "name": "wulfy",
   "version": "0.3.0",
   "description": "Wulfy",
+  "author": "80LK",
+  "license": "MIT",
+  "keywords": [
+    "wulfy",
+    "backend"
+  ],
   "repository": "https://github.com/Wulfy-JS/Wulfy",
   "main": "dist/index.js",
   "type": "module",
@@ -12,8 +18,6 @@
     "start": "node --es-module-specifier-resolution=node dist/index.js",
     "test": "node --experimental-modules  --experimental-import-meta-resolve --es-module-specifier-resolution=node dist/test/index.js | npx pino-pretty"
   },
-  "author": "80LK",
-  "license": "MIT",
   "devDependencies": {
     "@types/node": "^16.11.6",
     "@types/nunjucks": "^3.2.0",

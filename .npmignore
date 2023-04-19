@@ -1,6 +1,7 @@
-src
-.env
-tsconfig.json
-
 dist/test
+public
+src
 types/test
+.env
+config.json
+tsconfig.json
