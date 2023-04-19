@@ -1,7 +1,10 @@
 # Wulfy 0.3
+[ **EN** | [RU](README.RU.MD) ]
+
 <img src="public/icon.svg" width="250" title="Temporary icon Wulfy"/> [^1]
 
 # ENV Variables
+You can use ".env" file to define environment variables
 
 ```ini
 # Port for HTTP-Server
@@ -25,6 +28,8 @@ CONFIG_FILE = "path/to/config.json"
 ```
 
 # Config
+The path to the file is defined by the "CONFIG_FILE" environment variable. Default "config.json".  
+Example config-file:
 ```jsonc
 {
 	//Path to controllers
