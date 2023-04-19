@@ -35,4 +35,11 @@ CONFIG_FILE = "path/to/config.json"
 
 ```
 
+# TODO
+- [x] Controllers Router
+- [x] Statics Router
+- [ ] Errors Router (from controllers?)
+- [ ] \(???) Services (templates, models, etc.)
+
+
 [^1]: Icon download from [svgrepo.con](https://www.svgrepo.com/svg/89615/wolf-head)
