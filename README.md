@@ -34,13 +34,19 @@ Example config-file:
 {
 	//Path to controllers
 	"controllers": [
+		"path/to/controllers",
 		"controllers/**/*.js"
 	],
 	//List static dirs
 	"static": {
 		"/starts_url": ["path/to/static/folder1", "path/to/static/folder2"],
 		"/": "public"
-	}
+	},
+	//Path to controllers with error handlers
+	"error": [
+		"path/to/controllers",
+		"controllers/error.js",
+	]
 }
 
 ```
@@ -48,7 +54,7 @@ Example config-file:
 # TODO
 - [x] Controllers Router
 - [x] Statics Router
-- [ ] Errors Router (from controllers?)
+- [x] Errors Router
 - [ ] \(???) Services (templates, models, etc.)
 - [ ] External modules
 - [ ] Variables for Config-File

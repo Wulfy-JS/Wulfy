@@ -11,15 +11,17 @@ type StaticConfig = NodeJS.Dict<string[]>;
 interface RawConfig {
 	controllers: RawControllerConfig;
 	static: RawStaticConfig;
+	error: RawControllerConfig;
 }
 
 interface Config {
 	controllers: ControllerConfig;
 	static: StaticConfig;
+	error: ControllerConfig;
 }
 
-function prepareControllerConfig(config: RawControllerConfig): ControllerConfig {
-	if (!config) config = ["./controllers/**/*.js"];
+function prepareControllerConfig(config: RawControllerConfig, def?: string): ControllerConfig {
+	if (!config) config = def ? [def] : [];
 	if (!Array.isArray(config)) config = [config];
 
 	config = config.map(path => isAbsolute(path) ? path : resolve(process.cwd(), path));
@@ -46,13 +48,13 @@ function prepareStaticConfig(config: RawStaticConfig): StaticConfig {
 const defaultConfigFile = "config.json";
 function readConfig(): Config {
 	const file = DotEnv.getString("CONFIG_FILE", defaultConfigFile);
-	const cfg: RawConfig = JSON.parse(readFileSync(file, { encoding: 'utf-8' }));
-
-
-	return {
-		controllers: prepareControllerConfig(cfg.controllers),
-		static: prepareStaticConfig(cfg.static)
+	const rawConfig: RawConfig = JSON.parse(readFileSync(file, { encoding: 'utf-8' }));
+	const config: Config = {
+		controllers: prepareControllerConfig(rawConfig.controllers, "./controllers/**/*.js"),
+		static: prepareStaticConfig(rawConfig.static),
+		error: prepareControllerConfig(rawConfig.error)
 	};
+	return config;
 }
 
 export default readConfig;

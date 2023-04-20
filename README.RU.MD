@@ -33,13 +33,19 @@ CONFIG_FILE = "path/to/config.json"
 {
 	//Путь к контрллерам
 	"controllers": [
+		"path/to/controllers",
 		"controllers/**/*.js"
 	],
 	//Список путей со статикой
 	"static": {
 		"/starts_url": ["path/to/static/folder1", "path/to/static/folder2"],
 		"/": "public"
-	}
+	},
+	//Путь к контроллерам с обработчиками ошибок
+	"error": [
+		"path/to/controllers",
+		"controllers/error.js",
+	]
 }
 
 ```
@@ -47,7 +53,7 @@ CONFIG_FILE = "path/to/config.json"
 # TODO
 - [x] Роутер Контроллеров
 - [x] Роутер Статики
-- [ ] Роутер Ошибок (из контроллеров?)
+- [x] Роутер Ошибок
 - [ ] \(???) Сервисы (Шаблоны, модели и т.д.)
 - [ ] Внешние модули
 - [ ] Переменные для Конфиг-файла

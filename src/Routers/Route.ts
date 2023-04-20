@@ -70,9 +70,13 @@ function prepareMethods(methods: SingleOrArray<HttpMethod>): HttpMethod[] | "ALL
 
 	return methods;
 }
-// function Route(path: string, name: string, methods?: SingleOrArray<HttpMethod>);
-// function Route(options: RouteOptions);
-function Route(path_or_options: string | RouteOptions, name: string = "", methods: SingleOrArray<HttpMethod> = "ALL") {
+interface RouteDecorator {
+	(target: typeof Controller | Controller, propertyKey?: string): void
+}
+
+function Route(path: string, name: string, methods?: SingleOrArray<HttpMethod>): RouteDecorator;
+function Route(options: RouteOptions): RouteDecorator;
+function Route(path_or_options: string | RouteOptions, name: string = "", methods: SingleOrArray<HttpMethod> = "ALL"): RouteDecorator {
 	methods = prepareMethods((typeof path_or_options !== "string" && path_or_options.methods) || methods);
 	name = (typeof path_or_options !== "string" && path_or_options.name) || name;
 	const path = typeof path_or_options === "string" ? path_or_options : path_or_options.path;

@@ -14,6 +14,8 @@ import StaticRouter from "./Routers/StaticRouter";
 import { HttpMethod } from "./Routers/Route";
 import "./utils/HttpExtend";
 import HttpError from "./HttpError";
+import ErrorRouter from "./Routers/ErrorRouter";
+import { type } from "os";
 
 const MIN_PORT = 0,
 	MAX_PORT = 65535,
@@ -24,8 +26,10 @@ class Core {
 	private httpServer: Nullable<HttpServer> = null;
 	private httpsServer: Nullable<HttpsServer> = null;
 	private configured: boolean = false;
-	private router: Router = new Router();
-	private staticRouter: StaticRouter = new StaticRouter();
+
+	protected readonly router: Router = new Router();
+	protected readonly staticRouter: StaticRouter = new StaticRouter();
+	protected readonly errorRouter: ErrorRouter = new ErrorRouter();
 	private constructor() {
 		process.on("SIGINT", () => {
 			this.stop();
@@ -65,7 +69,7 @@ class Core {
 		return readFileSync(key_file).toString();
 	}
 
-	private onError(req: IncomingMessage, res: ServerResponse, error: any) {
+	private async onError(req: IncomingMessage, res: ServerResponse, error: any) {
 		if (!(error instanceof HttpError)) {
 			if (error instanceof Error)
 				error = new HttpError(error.message);
@@ -74,10 +78,21 @@ class Core {
 			else
 				error = new HttpError(JSON.stringify(error), 500);
 		}
-
-		res.statusCode = error.code;
-		res.write(error.message || "Internal Server Error");
-		res.end()
+		const errorHandler = await this.errorRouter.get(error.code);
+		try {
+			errorHandler(req, res, error);
+		} catch (e: any) {
+			res.writeHead(500);
+			res.end("500 Internal Server Error <br/>" +
+				(e instanceof Error
+					? (e.message + "<br/>" + e.stack)
+					: (typeof e == "object"
+						? JSON.stringify(e)
+						: e.toString()
+					)
+				)
+			);
+		}
 	}
 
 	private async onRequest(req: IncomingMessage, res: ServerResponse) {
@@ -104,7 +119,7 @@ class Core {
 		}
 
 		//Error 404
-		this.onError(req, res, new HttpError("Not Found", 404));
+		await this.onError(req, res, new HttpError("Not Found", 404));
 	}
 
 	private redirect(req: IncomingMessage, res: ServerResponse) {
@@ -122,6 +137,7 @@ class Core {
 		const cfg = readConfig();
 
 		await this.router.configure(cfg.controllers);
+		await this.errorRouter.configure(cfg.error);
 		this.staticRouter.configure(cfg.static);
 
 		return this;

@@ -4,5 +4,8 @@
 	],
 	"static": {
 		"/": "public"
-	}
+	},
+	"error": [
+		"dist/test/controllers/error.js"
+	]
 }
