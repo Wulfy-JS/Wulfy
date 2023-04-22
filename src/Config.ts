@@ -12,16 +12,18 @@ interface RawConfig {
 	controllers: RawControllerConfig;
 	static: RawStaticConfig;
 	error: RawControllerConfig;
+	services: RawControllerConfig;
 }
 
 interface Config {
 	controllers: ControllerConfig;
 	static: StaticConfig;
 	error: ControllerConfig;
+	services: ControllerConfig;
 }
 
-function prepareControllerConfig(config: RawControllerConfig, def?: string): ControllerConfig {
-	if (!config) config = def ? [def] : [];
+function prepareControllerConfig(config: RawControllerConfig, def: ControllerConfig = []): ControllerConfig {
+	if (!config) config = def;
 	if (!Array.isArray(config)) config = [config];
 
 	config = config.map(path => isAbsolute(path) ? path : resolve(process.cwd(), path));
@@ -50,9 +52,10 @@ function readConfig(): Config {
 	const file = DotEnv.getString("CONFIG_FILE", defaultConfigFile);
 	const rawConfig: RawConfig = JSON.parse(readFileSync(file, { encoding: 'utf-8' }));
 	const config: Config = {
-		controllers: prepareControllerConfig(rawConfig.controllers, "./controllers/**/*.js"),
+		controllers: prepareControllerConfig(rawConfig.controllers, ["./controllers/**/*.js"]),
 		static: prepareStaticConfig(rawConfig.static),
-		error: prepareControllerConfig(rawConfig.error)
+		error: prepareControllerConfig(rawConfig.error),
+		services: prepareControllerConfig(rawConfig.services),
 	};
 	return config;
 }

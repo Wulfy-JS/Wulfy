@@ -15,7 +15,7 @@ import { HttpMethod } from "./Routers/Route";
 import "./utils/HttpExtend";
 import HttpError from "./HttpError";
 import ErrorRouter from "./Routers/ErrorRouter";
-import { type } from "os";
+import ServiceList from "./Services/ServiceList";
 
 const MIN_PORT = 0,
 	MAX_PORT = 65535,
@@ -30,6 +30,7 @@ class Core {
 	protected readonly router: Router = new Router();
 	protected readonly staticRouter: StaticRouter = new StaticRouter();
 	protected readonly errorRouter: ErrorRouter = new ErrorRouter();
+	protected readonly serviceList: ServiceList = new ServiceList();
 	private constructor() {
 		process.on("SIGINT", () => {
 			this.stop();
@@ -80,7 +81,7 @@ class Core {
 		}
 		const errorHandler = await this.errorRouter.get(error.code);
 		try {
-			errorHandler(req, res, error);
+			errorHandler(req, res, this.serviceList, error);
 		} catch (e: any) {
 			res.writeHead(500);
 			res.end("500 Internal Server Error <br/>" +
@@ -106,7 +107,7 @@ class Core {
 		const controller = await this.router.getRoute(url.pathname, <HttpMethod>method.toUpperCase());
 		if (controller !== false) {
 			try {
-				await controller(req, res);
+				await controller(req, res, this.serviceList);
 			} catch (e) {
 				this.onError(req, res, e);
 			}
@@ -138,6 +139,7 @@ class Core {
 
 		await this.router.configure(cfg.controllers);
 		await this.errorRouter.configure(cfg.error);
+		await this.serviceList.configure(cfg.services);
 		this.staticRouter.configure(cfg.static);
 
 		return this;

@@ -3,6 +3,11 @@ import { IncomingMessage, ServerResponse } from "http";
 import { ErrorHandlesList } from "./ErrorRoute";
 import { glob } from "glob";
 import loadModule from "../utils/loadModule";
+import Controller from "../Controller";
+import ServiceList from "../Services/ServiceList";
+import { normalize, resolve } from "path";
+import nunjucks from "nunjucks";
+import { readFileSync } from "fs";
 
 interface RouterErrorHandlesList {
 	meta: ErrorHandlesList;
@@ -11,8 +16,10 @@ interface RouterErrorHandlesList {
 }
 
 
+
 class ErrorRouter {
 	private list: Set<RouterErrorHandlesList> = new Set();
+	private template = nunjucks.compile(readFileSync(resolve(decodeURI(import.meta.url).slice(process.platform == "win32" ? 8 : 7), "../../../views/error.njk"), { encoding: "utf-8" }));
 
 	public async configure(paths: string[]) {
 		this.list.clear();
@@ -45,9 +52,9 @@ class ErrorRouter {
 	}
 
 	public async get(code: number) {
-		for (const [, controller] of this.list.entries()) {
-			for (const i in controller.meta) {
-				const route = controller.meta[i];
+		for (const [, controllerMeta] of this.list.entries()) {
+			for (const i in controllerMeta.meta) {
+				const route = controllerMeta.meta[i];
 				if (!route) continue;
 
 				const valid = route.findIndex(value => {
@@ -59,18 +66,28 @@ class ErrorRouter {
 
 				if (!valid) continue;
 
-				const module = await loadModule(controller.path);
-				return async (req: IncomingMessage, res: ServerResponse, error: HttpError) => {
-					return await (new module[controller.export](req, res))[i](error);
+				// const module = await loadModule(controller.path);
+				const module: NodeJS.Dict<Constructor<typeof Controller>> = await loadModule(controllerMeta.path);
+				const controller = module[controllerMeta.export];
+				if (!controller) continue;
+				return async (req: IncomingMessage, res: ServerResponse, serviceList: ServiceList, error: HttpError) => {
+					const controllerInstance = new controller(req, res, serviceList);
+					//@ts-ignore
+					return await controllerInstance[i](error);
 				}
 			}
 		}
-		return this.defaultRoute;
+		return this.defaultRoute.bind(this);
 	}
 
-	private defaultRoute(req: IncomingMessage, res: ServerResponse, error: HttpError) {
+	private defaultRoute(req: IncomingMessage, res: ServerResponse, serviceList: ServiceList, error: HttpError) {
 		res.statusCode = error.code;
-		res.write(error.message || "Internal Server Error");
+		res.write(this.template.render({
+			code: error.code,
+			error: error,
+			message: error.message,
+			stack: error.stack
+		}));
 		res.end()
 	}
 }

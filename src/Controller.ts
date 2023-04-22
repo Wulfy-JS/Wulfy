@@ -2,6 +2,8 @@ import { createReadStream, existsSync } from "fs";
 import { IncomingMessage, ServerResponse } from "http";
 
 import mime from "mime";
+import ServiceList from "./Services/ServiceList";
+import Service from "./Services/Service";
 
 type Header = number | string | string[];
 type Headers = NodeJS.Dict<Header>;
@@ -10,7 +12,8 @@ abstract class Controller {
 
 	constructor(
 		protected readonly request: IncomingMessage,
-		protected readonly response: ServerResponse
+		protected readonly response: ServerResponse,
+		private readonly services: ServiceList
 	) { }
 
 	//Alias for this.request
@@ -43,6 +46,10 @@ abstract class Controller {
 			"content-type": mime.getType(path) || "text/plain"
 		})
 		createReadStream(path).pipe(this.res);
+	}
+
+	public getService(name: string): Service {
+		return this.services.get(name);
 	}
 }
 

@@ -1,9 +1,11 @@
-import { isAbsolute } from "path";
+import { isAbsolute, resolve } from "path";
 
 export default function loadModule(path: string) {
-	if (process.platform == "win32" && isAbsolute(path)) {
+	if (isAbsolute(path)) {
 		path = "file://" + path;
+	} else {
+		path = "file://" + resolve(process.cwd(), path);
 	}
 
-	return import(path);
+	return import(path + "?t=" + Date.now());
 }

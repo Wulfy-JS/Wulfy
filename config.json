@@ -5,6 +5,9 @@
 	"static": {
 		"/": "public"
 	},
+	"services": [
+		"dist/test/services"
+	],
 	"error": [
 		"dist/test/controllers/error.js"
 	]

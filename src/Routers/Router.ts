@@ -5,6 +5,8 @@ import { match } from "path-to-regexp";
 
 import loadModule from "../utils/loadModule";
 import { ControllerMeta, HttpMethod } from "./Route";
+import Controller from "../Controller";
+import ServiceList from "../Services/ServiceList";
 
 interface RouterControllerMeta {
 	meta: ControllerMeta;
@@ -48,21 +50,25 @@ class Router {
 	}
 
 	public async getRoute(path: string, method: HttpMethod) {
-		for (const [, controller] of this.list.entries()) {
-			if (controller.meta.methods != "ALL" && controller.meta.methods.indexOf(method) == -1)
+		for (const [, controllerMeta] of this.list.entries()) {
+			if (controllerMeta.meta.methods != "ALL" && controllerMeta.meta.methods.indexOf(method) == -1)
 				continue;
-			if (!path.startsWith(controller.meta.path))
+			if (!path.startsWith(controllerMeta.meta.path))
 				continue;
-			for (const i in controller.meta.routes) {
-				const route = controller.meta.routes[i];
+			for (const i in controllerMeta.meta.routes) {
+				const route = controllerMeta.meta.routes[i];
 				if (!route) continue;
 				if (route.methods != "ALL" && route.methods.indexOf(method) == -1)
 					continue;
 				const matches = match(route.path)(path);
 				if (matches === false) continue;
-				const module = await loadModule(controller.path);
-				return async (req: IncomingMessage, res: ServerResponse) => {
-					return await (new module[controller.export](req, res))[i](matches)
+				const module: NodeJS.Dict<Constructor<typeof Controller>> = await loadModule(controllerMeta.path);
+				const controller = module[controllerMeta.export];
+				if (!controller) continue;
+				return async (req: IncomingMessage, res: ServerResponse, serviceList: ServiceList) => {
+					const controllerInstance = new controller(req, res, serviceList);
+					//@ts-ignore
+					return await controllerInstance[i](matches)
 				}
 			}
 		}

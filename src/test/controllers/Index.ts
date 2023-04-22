@@ -9,11 +9,15 @@ class IndexController extends Controller {
 	}
 }
 
+
+
+
 @Route("/test", "test", 'GET')
 class TestController extends Controller {
 	@Route({ name: "index", path: '', methods: 'ALL' })
 	public index() {
-		this.json({ test: 1 });
+		const service = this.getService("nunjucks");
+		this.res.end(service.render("error.njk", { code: 202 }));
 	}
 
 	@Route({ name: "test_asd", path: '/asd', methods: ['GET', 'PATCH'] })
