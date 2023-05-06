@@ -16,8 +16,10 @@ class IndexController extends Controller {
 class TestController extends Controller {
 	@Route({ name: "index", path: '', methods: 'ALL' })
 	public index() {
-		const service = this.getService("nunjucks");
-		this.res.end(service.render("error.njk", { code: 202 }));
+		const nunj = this.getService("nunjucks");
+		const service = this.getService("test");
+		console.log(service.getValue());
+		this.res.end(nunj.render("error.njk", { error: { code: service.getValue() } }));
 	}
 
 	@Route({ name: "test_asd", path: '/asd', methods: ['GET', 'PATCH'] })

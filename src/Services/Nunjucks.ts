@@ -1,18 +1,12 @@
 import { resolve } from "path";
-import { Service, RegisterService } from "../../index"
+import Service from "./Service";
+import RegisterService from "./RegisterService";
 import nunjucks from "nunjucks";
 
-declare module "../../index" {
+declare module "../index" {
 	interface Controller {
 		getService(name: "nunjucks"): NunjucksService;
 	}
-}
-
-
-
-@RegisterService("nunjucks")
-class TestService extends Service {
-
 }
 
 @RegisterService("nunjucks")

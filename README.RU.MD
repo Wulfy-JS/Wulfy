@@ -58,5 +58,6 @@ CONFIG_FILE = "path/to/config.json"
 - [ ] Внешние модули
 - [ ] Переменные для Конфиг-файла
 - [ ] CLI
+- [ ] Lifecicle
 
 [^1]: Иконка загружена с сайта [svgrepo.con](https://www.svgrepo.com/svg/89615/wolf-head)

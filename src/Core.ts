@@ -16,6 +16,7 @@ import "./utils/HttpExtend";
 import HttpError from "./HttpError";
 import ErrorRouter from "./Routers/ErrorRouter";
 import ServiceList from "./Services/ServiceList";
+import NunjucksService from "./Services/Nunjucks";
 
 const MIN_PORT = 0,
 	MAX_PORT = 65535,
@@ -137,6 +138,7 @@ class Core {
 
 		const cfg = readConfig();
 
+		this.serviceList.registerService("nunjucks", new NunjucksService());
 		await this.router.configure(cfg.controllers);
 		await this.errorRouter.configure(cfg.error);
 		await this.serviceList.configure(cfg.services);

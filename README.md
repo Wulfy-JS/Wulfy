@@ -59,5 +59,6 @@ Example config-file:
 - [ ] External modules
 - [ ] Variables for Config-File
 - [ ] CLI
+- [ ] Lifecicle
 
 [^1]: Icon download from [svgrepo.con](https://www.svgrepo.com/svg/89615/wolf-head)
