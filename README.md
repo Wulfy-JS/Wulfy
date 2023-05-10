@@ -45,7 +45,7 @@ Example config-file:
 - [x] Statics Router
 - [x] Errors Router
 - [x] Services (templates, models, etc.)
-- [ ] Threads
+- [ ] Clusters
 - [ ] External modules
 - [ ] Variables for Config-File
 - [ ] CLI
