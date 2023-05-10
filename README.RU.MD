@@ -31,6 +31,19 @@ CONFIG_FILE = "path/to/config.json"
 Пример конфиг-файла:
 ```jsonc
 {
+	//Конфигурация сервера
+	"server":{
+		// Порт для HTTP-Сервера
+		"http_port": 80,
+		// Порт для HTTPS-Сервера (Опционально. Игнорируется без "certificate" и "private_key")
+		"https_port": 443,
+		// Переадрисация на HTTPS-Сервер (Опционально. Игнорируется без "certificate" и "private_key")
+		"tls_redirect": true,
+		// Файл с приватным ключем для HTTPS-Сервера (Опционально. Обязательно с "certificate")
+		"private_key": "path/to/file.key",
+		// Файл с сертификатам для HTTPS-Сервера (Опционально. Обязательно с "private_key")
+		"certificate": "path/to/file.cert"
+	},
 	//Путь к контрллерам
 	"controllers": [
 		"path/to/controllers",

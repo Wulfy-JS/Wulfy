@@ -7,9 +7,8 @@ import "reflect-metadata";
 
 import HttpServer from "./Server/HttpServer";
 import HttpsServer from "./Server/HttpsServer";
-import DotEnv from './utils/DotEnv';
 import Router from "./Routers/Router";
-import readConfig from "./Config";
+import readConfig, { Config, TLSServerConfig, isTLSServerConfig } from "./Config";
 import StaticRouter from "./Routers/StaticRouter";
 import { HttpMethod } from "./Routers/Route";
 import "./utils/HttpExtend";
@@ -27,31 +26,31 @@ class Core {
 	private httpServer: Nullable<HttpServer> = null;
 	private httpsServer: Nullable<HttpsServer> = null;
 	private configured: boolean = false;
+	private readonly config: Config;
 
 	protected readonly router: Router = new Router();
 	protected readonly staticRouter: StaticRouter = new StaticRouter();
 	protected readonly errorRouter: ErrorRouter = new ErrorRouter();
 	protected readonly serviceList: ServiceList = new ServiceList();
 	private constructor() {
+		this.config = readConfig();
 		process.on("SIGINT", () => {
 			this.stop();
 		});
 	}
 
-	private getPort(ENV_KEY: string, defaultValue: number) {
-		const port = DotEnv.getInt(ENV_KEY, defaultValue);
-		if (port < MIN_PORT) throw new ReferenceError(`${ENV_KEY} was been >= ${MIN_PORT}`);
-		if (port > MAX_PORT) throw new ReferenceError(`${ENV_KEY} was been <= ${MAX_PORT}`);
+	private getPort(type: "http_port" | "https_port", defaultValue: number) {
+		const port = (<TLSServerConfig>this.config.server)[type] || defaultValue;
+		if (port < MIN_PORT) throw new ReferenceError(`"server.${type}" was been >= ${MIN_PORT}`);
+		if (port > MAX_PORT) throw new ReferenceError(`"server.${type}" was been <= ${MAX_PORT}`);
 		return port;
 	}
 
 	private getPrivateKey(): Nullable<string> {
-		// Check key in env
-		const key = DotEnv.getString("PRIVATE_KEY");
-		if (key !== null) return key;
-		// Check path to key-file in env
-		const key_file = DotEnv.getString("PRIVATE_KEY_FILE");
-		if (key_file === null) return null;
+		const cfg = this.config.server;
+		if (!isTLSServerConfig(cfg)) return null;
+
+		const key_file = cfg.private_key;
 		// Check exists key-file
 		if (!existsSync(key_file)) return null;
 
@@ -59,13 +58,11 @@ class Core {
 	}
 
 	private getCertificate(): Nullable<string> {
-		// Check key in env
-		const key = DotEnv.getString("CERTIFICATE");
-		if (key !== null) return key;
-		// Check path to key-file in env
-		const key_file = DotEnv.getString("CERTIFICATE_FILE");
-		if (key_file === null) return null;
-		// Check exists key-file
+		const cfg = this.config.server;
+		if (!isTLSServerConfig(cfg)) return null;
+
+		const key_file = cfg.certificate;
+		// Check exists certificate-file
 		if (!existsSync(key_file)) return null;
 
 		return readFileSync(key_file).toString();
@@ -149,29 +146,31 @@ class Core {
 
 	public async start() {
 		if (this.httpServer !== null || this.httpsServer !== null) return;
-		DotEnv.config();
 
 		if (!this.configured)
 			await this.configure();
 
-		this.httpServer = new HttpServer();
+		let redirect = false;
+		const cfg = this.config.server;
+		if (isTLSServerConfig(cfg)) {
+			const key = this.getPrivateKey();
+			const cert = this.getCertificate();
+			const canRun = key != null && cert != null;
 
-		const key = this.getPrivateKey();
-		const cert = this.getCertificate();
-		const canRun = key != null && cert != null;
-
-		if (canRun) {
-			this.httpsServer = new HttpsServer({ key: key, cert: cert })
-			this.httpsServer.on('request', (req, res) => this.onRequest(req, res));
-			this.httpsServer.listen(this.getPort("HTTPS_PORT", DEFAULT_HTTPS_PORT));
+			if (canRun) {
+				this.httpsServer = new HttpsServer({ key: key, cert: cert })
+				this.httpsServer.on('request', (req, res) => this.onRequest(req, res));
+				this.httpsServer.listen(this.getPort("https_port", DEFAULT_HTTPS_PORT));
+				redirect = cfg.tls_redirect;
+			}
 		}
 
-		const redirect = canRun && DotEnv.getBoolean("TLS_REDIRECT", false);
+		this.httpServer = new HttpServer();
 		this.httpServer.on('request', (req, res) => {
 			redirect ? this.redirect(req, res) : this.onRequest(req, res)
 		});
 
-		this.httpServer.listen(this.getPort("HTTP_PORT", DEFAULT_HTTP_PORT));
+		this.httpServer.listen(this.getPort("http_port", DEFAULT_HTTP_PORT));
 		return this;
 	}
 

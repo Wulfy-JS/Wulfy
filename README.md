@@ -3,35 +3,24 @@
 
 <img src="public/icon.svg" width="250" title="Temporary icon Wulfy"/> [^1]
 
-# ENV Variables
-You can use ".env" file to define environment variables
-
-```ini
-# Port for HTTP-Server
-HTTP_PORT = 80 
-
-# Port for HTTPS-Server
-HTTPS_PORT = 433 
-# Redirect to HTTPS-Server
-TLS_REDIRECT = false
-# Private Key for HTTPS-Server
-PRIVATE_KEY = "key"
-# File with Private Key for HTTPS-Server
-PRIVATE_KEY_FILE = "path/to/file.key"
-# Certificate for HTTPS-Server
-CERTIFICATE = "cert"
-# File with Certificate for HTTPS-Server
-CERTIFICATE_FILE = "path/to/file.cert"
-
-# Config-File
-CONFIG_FILE = "path/to/config.json"
-```
-
 # Config
 The path to the file is defined by the "CONFIG_FILE" environment variable. Default "config.json".  
 Example config-file:
 ```jsonc
 {
+	//Config server
+	"server":{
+		// Port for HTTP-Server
+		"http_port": 80,
+		// Port for HTTPS-Server (Optional. Ignored without "certificate" and "private_key")
+		"https_port": 443,
+		// Redirect to HTTPS-Server (Optional. Ignored without "certificate" and "private_key")
+		"tls_redirect": true,
+		// File with Private Key for HTTPS-Server (Optional. Required with "certificate")
+		"private_key": "path/to/file.key",
+		// File with Certificate for HTTPS-Server (Optional. Required with "private_key")
+		"certificate": "path/to/file.cert"
+	},
 	//Path to controllers
 	"controllers": [
 		"path/to/controllers",

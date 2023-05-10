@@ -1,21 +1,38 @@
 import { readFileSync } from "fs";
 import { isAbsolute, resolve } from "path";
 
-import DotEnv from "./utils/DotEnv";
-
 type RawControllerConfig = Undefined<SingleOrArray<string>>;
 type ControllerConfig = string[];
 type RawStaticConfig = Undefined<NodeJS.Dict<SingleOrArray<string>>>;
 type StaticConfig = NodeJS.Dict<string[]>;
+interface RawServerConfig {
+	http_port?: number;
+	https_port?: number;
+	tls_redirect?: boolean;
+	private_key?: string;
+	certificate?: string;
+}
+interface BaseServerConfig {
+	http_port: number;
+}
+interface TLSServerConfig extends BaseServerConfig {
+	https_port: number;
+	tls_redirect: boolean;
+	private_key: string;
+	certificate: string;
+}
+type ServerConfig = BaseServerConfig | TLSServerConfig;
 
 interface RawConfig {
-	controllers: RawControllerConfig;
-	static: RawStaticConfig;
-	error: RawControllerConfig;
-	services: RawControllerConfig;
+	server?: RawServerConfig;
+	controllers?: RawControllerConfig;
+	static?: RawStaticConfig;
+	error?: RawControllerConfig;
+	services?: RawControllerConfig;
 }
 
 interface Config {
+	server: ServerConfig;
 	controllers: ControllerConfig;
 	static: StaticConfig;
 	error: ControllerConfig;
@@ -46,18 +63,38 @@ function prepareStaticConfig(config: RawStaticConfig): StaticConfig {
 	return preparedConfig;
 }
 
+function prepareServerConfig(config: RawServerConfig = {}): ServerConfig {
+	if (config.certificate && config.private_key)
+		return {
+			http_port: config.http_port || 80,
+			https_port: config.https_port || 443,
+			certificate: config.certificate,
+			tls_redirect: config.tls_redirect || true,
+			private_key: config.private_key
+
+		}
+	return {
+		http_port: config.http_port || 80
+	};
+}
+
 
 const defaultConfigFile = "config.json";
 function readConfig(): Config {
-	const file = DotEnv.getString("CONFIG_FILE", defaultConfigFile);
-	const rawConfig: RawConfig = JSON.parse(readFileSync(file, { encoding: 'utf-8' }));
+	const rawConfig: RawConfig = JSON.parse(readFileSync(defaultConfigFile, { encoding: 'utf-8' }));
 	const config: Config = {
 		controllers: prepareControllerConfig(rawConfig.controllers, ["./controllers/**/*.js"]),
 		static: prepareStaticConfig(rawConfig.static),
 		error: prepareControllerConfig(rawConfig.error),
 		services: prepareControllerConfig(rawConfig.services),
+		server: prepareServerConfig(rawConfig.server)
 	};
 	return config;
 }
 
+function isTLSServerConfig(cfg: ServerConfig): cfg is TLSServerConfig {
+	return !!((<TLSServerConfig>cfg).private_key && (<TLSServerConfig>cfg).certificate);
+}
+
 export default readConfig;
+export { Config, isTLSServerConfig, TLSServerConfig };

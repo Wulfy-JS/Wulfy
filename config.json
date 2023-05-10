@@ -1,4 +1,7 @@
 {
+	"server": {
+		"http_port": 8080
+	},
 	"controllers": [
 		"dist/test/controllers"
 	],
