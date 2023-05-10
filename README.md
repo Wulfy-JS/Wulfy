@@ -55,7 +55,7 @@ Example config-file:
 - [x] Controllers Router
 - [x] Statics Router
 - [x] Errors Router
-- [ ] \(???) Services (templates, models, etc.)
+- [x] Services (templates, models, etc.)
 - [ ] Threads
 - [ ] External modules
 - [ ] Variables for Config-File
