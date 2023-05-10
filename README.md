@@ -8,7 +8,7 @@ The path to the file is defined by the "CONFIG_FILE" environment variable. Defau
 Example config-file:
 ```jsonc
 {
-	//Config server
+	// Config server
 	"server":{
 		// Port for HTTP-Server
 		"http_port": 80,
@@ -21,17 +21,21 @@ Example config-file:
 		// File with Certificate for HTTPS-Server (Optional. Required with "private_key")
 		"certificate": "path/to/file.cert"
 	},
-	//Path to controllers
+	// Path to controllers
 	"controllers": [
 		"path/to/controllers",
 		"controllers/**/*.js"
 	],
-	//List static dirs
+	// List static dirs
 	"static": {
 		"/starts_url": ["path/to/static/folder1", "path/to/static/folder2"],
 		"/": "public"
 	},
-	//Path to controllers with error handlers
+	// Path to services
+	"services": [
+		"path/to/services"
+	],
+	// Path to controllers with error handlers
 	"error": [
 		"path/to/controllers",
 		"controllers/error.js",

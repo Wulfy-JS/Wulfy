@@ -8,7 +8,7 @@
 Пример конфиг-файла:
 ```jsonc
 {
-	//Конфигурация сервера
+	// Конфигурация сервера
 	"server":{
 		// Порт для HTTP-Сервера
 		"http_port": 80,
@@ -21,17 +21,21 @@
 		// Файл с сертификатам для HTTPS-Сервера (Опционально. Обязательно с "private_key")
 		"certificate": "path/to/file.cert"
 	},
-	//Путь к контрллерам
+	// Путь к контрллерам
 	"controllers": [
 		"path/to/controllers",
 		"controllers/**/*.js"
 	],
-	//Список путей со статикой
+	// Список путей со статикой
 	"static": {
 		"/starts_url": ["path/to/static/folder1", "path/to/static/folder2"],
 		"/": "public"
 	},
-	//Путь к контроллерам с обработчиками ошибок
+	// Путь к сервисам
+	"services": [
+		"path/to/services"
+	],
+	// Путь к контроллерам с обработчиками ошибок
 	"error": [
 		"path/to/controllers",
 		"controllers/error.js",
