@@ -3,29 +3,6 @@
 
 <img src="public/icon.svg" width="250" title="Temporary icon Wulfy"/> [^1]
 
-# ENV Переменные
-Вы можете использовать файл ".env" для определения переменных окружения.
-```ini
-# Порт для HTTP-Сервера
-HTTP_PORT = 80 
-
-# Порт для HTTPS-Сервера
-HTTPS_PORT = 433 
-# Переадрисация на HTTPS-Сервер
-TLS_REDIRECT = false
-# Приватный ключ для HTTPS-Сервера
-PRIVATE_KEY = "key"
-# Файл с приватным ключем для HTTPS-Сервера
-PRIVATE_KEY_FILE = "path/to/file.key"
-# Сертификат для HTTPS-Сервера
-CERTIFICATE = "cert"
-# Файл с сертификатам для HTTPS-Сервера
-CERTIFICATE_FILE = "path/to/file.cert"
-
-# Конфиг-файл
-CONFIG_FILE = "path/to/config.json"
-```
-
 # Конфиг
 Путь к файлу определен переменной окружения "CONFIG_FILE". По умолчанию "config.json".  
 Пример конфиг-файла:
