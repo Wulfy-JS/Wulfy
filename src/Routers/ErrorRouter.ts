@@ -5,9 +5,9 @@ import { glob } from "glob";
 import loadModule from "../utils/loadModule";
 import Controller from "../Controller";
 import ServiceList from "../Services/ServiceList";
-import { normalize, resolve } from "path";
 import nunjucks from "nunjucks";
 import { readFileSync } from "fs";
+import getWulfyPath from "../utils/getWulfyPath";
 
 interface RouterErrorHandlesList {
 	meta: ErrorHandlesList;
@@ -19,7 +19,7 @@ interface RouterErrorHandlesList {
 
 class ErrorRouter {
 	private list: Set<RouterErrorHandlesList> = new Set();
-	private template = nunjucks.compile(readFileSync(resolve(decodeURI(import.meta.url).slice(process.platform == "win32" ? 8 : 7), "../../../views/error.njk"), { encoding: "utf-8" }));
+	private template = nunjucks.compile(readFileSync(getWulfyPath("views/error.njk"), { encoding: "utf-8" }));
 
 	public async configure(paths: string[]) {
 		this.list.clear();
