@@ -10,7 +10,6 @@ import HttpsServer from "./Server/HttpsServer";
 import Router from "./Routers/Router";
 import readConfig, { Config, TLSServerConfig, isTLSServerConfig } from "./Config";
 import StaticRouter from "./Routers/StaticRouter";
-import { HttpMethod } from "./Routers/Route";
 import "./utils/HttpExtend";
 import HttpError from "./HttpError";
 import ErrorRouter from "./Routers/ErrorRouter";
@@ -77,9 +76,10 @@ class Core {
 			else
 				error = new HttpError(JSON.stringify(error), 500);
 		}
-		const errorHandler = await this.errorRouter.get(error.code);
+
+		const errorHandler = await this.errorRouter.get(req, error);
 		try {
-			errorHandler(req, res, this.serviceList, error);
+			errorHandler(res, this.serviceList);
 		} catch (e: any) {
 			res.writeHead(500);
 			res.end("500 Internal Server Error <br/>" +
@@ -99,19 +99,19 @@ class Core {
 		 * HTTPS server gives TLS Socket
 		 */
 		req.secure = req.socket instanceof TLSSocket ? req.socket.encrypted : false;
-		const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
-		const method = (req.method || 'get').toUpperCase();
 
-		const controller = await this.router.getRoute(url.pathname, <HttpMethod>method.toUpperCase());
+		const controller = await this.router.get(req);
 		if (controller !== false) {
 			try {
-				await controller(req, res, this.serviceList);
+				await controller(res, this.serviceList);
 			} catch (e) {
 				this.onError(req, res, e);
 			}
 			return;
 		}
 
+		const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+		const method = (req.method || 'get').toUpperCase();
 		if (method == "GET" || method == "HEAD") {
 			const file = this.staticRouter.getRoute(url.pathname);
 			if (file) return file(req, res);
@@ -135,11 +135,12 @@ class Core {
 
 		const cfg = readConfig();
 
-		this.serviceList.registerService("nunjucks", new NunjucksService());
 		await this.router.configure(cfg.controllers);
 		await this.errorRouter.configure(cfg.error);
 		await this.serviceList.configure(cfg.services);
 		this.staticRouter.configure(cfg.static);
+
+		this.serviceList.registerService("nunjucks", new NunjucksService());
 
 		return this;
 	}

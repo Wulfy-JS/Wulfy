@@ -1,7 +1,4 @@
 import { resolve } from "path/posix";
-
-import "reflect-metadata";
-
 import Controller from "../Controller";
 
 type HttpMethod =
@@ -35,107 +32,135 @@ type HttpMethod =
 	// Allowed all http-methods
 	"ALL";
 
+interface RouteInfo<M = never> {
+	name: string;
+	path: string;
 
-// type HttpMethod = "get";
+	methods: HttpMethod[] | "ALL";
 
-interface RouteOptions {
-	path: string,
-	name: string,
-
-	/**
-	 * @default HttpMethod.ALL
-	 */
-	methods?: SingleOrArray<HttpMethod>
+	meta?: M;
 }
-interface RouteMeta {
-	path: string,
-	name: string,
-	methods: HttpMethod[] | "ALL"
-};
 
-interface ControllerMeta extends RouteMeta {
-	routes: NodeJS.Dict<RouteMeta>
-};
-
-function prepareMethods(methods: SingleOrArray<HttpMethod>): HttpMethod[] | "ALL" {
-	if (!Array.isArray(methods)) {
-		if (methods == "ALL")
-			return methods;
-		else
-			methods = [methods];
-	}
-
-	if (methods.indexOf("ALL") != -1)
-		return "ALL";
-
-	return methods;
+interface RootRouteInfo<M = never> extends RouteInfo<M> {
+	routes: NodeJS.Dict<RouteInfo<M>>;
 }
+
 interface RouteDecorator {
 	(target: typeof Controller | Controller, propertyKey?: string): void
 }
 
-function Route(path: string, name: string, methods?: SingleOrArray<HttpMethod>): RouteDecorator;
-function Route(options: RouteOptions): RouteDecorator;
-function Route(path_or_options: string | RouteOptions, name: string = "", methods: SingleOrArray<HttpMethod> = "ALL"): RouteDecorator {
-	methods = prepareMethods((typeof path_or_options !== "string" && path_or_options.methods) || methods);
-	name = (typeof path_or_options !== "string" && path_or_options.name) || name;
-	const path = typeof path_or_options === "string" ? path_or_options : path_or_options.path;
+interface RouteOptions<M = never> {
+	path: string;
+	name?: string;
 
-	const options: RouteMeta = {
-		methods,
-		name,
-		path
-	};
+	methods?: SingleOrArray<HttpMethod>;
 
-	return (target: typeof Controller | Controller, propertyKey: string = "") => {
-		if (target instanceof Controller) {
-			RouteMethod(target, propertyKey, options)
-		} else {
-			RouteClass(target, options);
-		}
-	};
+	meta?: M;
 }
 
-const _router = "@router";
+interface PreparedRouteOptions<M = never> {
+	path: string;
+	name?: string;
+
+	methods: HttpMethod[] | "ALL";
+
+	meta?: M;
+}
+
+
+function prepareRouteOptions<M = never>(path_or_options: string | RouteOptions<M>, name?: string, methods?: SingleOrArray<HttpMethod>, meta?: M): PreparedRouteOptions<M> {
+	if (typeof path_or_options === "string")
+		return {
+			name, path: path_or_options, methods: prepareMethods(methods), meta
+		}
+
+	return Object.assign(path_or_options, {
+		methods: prepareMethods(path_or_options.methods)
+	});
+
+
+}
+
+
+
 declare global {
 	namespace Reflect {
 		let Controller: string;
 	}
 }
 
-Reflect.Controller = "@controller";
+Reflect.Controller = "@wulfy.controller";
 
-function RouteMethod(target: Controller, method: string, options: RouteMeta) {
-	const meta = Reflect.getMetadata(_router, target.constructor) || {};
-	meta[method] = options;
-	Reflect.defineMetadata(_router, meta, target.constructor);
+function Route<M = never>(path: string, name: string, methods?: SingleOrArray<HttpMethod>, meta?: M): RouteDecorator;
+function Route<M = never>(options: RouteOptions<M>): RouteDecorator;
+function Route<M = never>(path_or_options: string | RouteOptions<M>, name: string = "", methods: SingleOrArray<HttpMethod> = "ALL", meta?: M): RouteDecorator {
+	const options = prepareRouteOptions<M>(path_or_options, name, methods, meta);
+
+	return (target: typeof Controller | Controller, propertyKey: string = "") => {
+		const reftarget: typeof Controller = target instanceof Controller ? <typeof Controller>target.constructor : target;
+		let meta = getRootRouteInfo<M>(reftarget);
+
+
+		meta = target instanceof Controller ? RouteMethod<M>(meta, propertyKey, options) : RouteClass<M>(meta, options);
+
+		Reflect.defineMetadata(Reflect.Controller, meta, reftarget);
+	};
 }
-function RouteClass(target: typeof Controller, options: RouteMeta) {
-	const meta: NodeJS.Dict<RouteMeta> = Reflect.getMetadata(_router, target);
-	const t: ControllerMeta = {
-		...options,
+
+function prepareMethods(methods: SingleOrArray<HttpMethod> = "ALL"): HttpMethod[] | "ALL" {
+	if (!Array.isArray(methods))
+		return methods == "ALL" ? methods : [methods];
+
+	if (methods.indexOf("ALL") != -1)
+		return "ALL";
+
+	return methods;
+}
+
+function getRootRouteInfo<M = never>(target: typeof Controller, metadata: string = Reflect.Controller): RootRouteInfo<M> {
+	return Reflect.getMetadata(metadata, target) || {
+		name: target.name,
+		path: "/",
+		methods: "ALL",
 		routes: {}
 	};
+}
 
-	for (const i in meta) {
-		const route = meta[i];
+
+function RouteMethod<M = never>(meta: RootRouteInfo<M>, method: string, routeInfo: PreparedRouteOptions<M>) {
+	meta.routes[method] = Object.assign({ name: method }, routeInfo);
+
+	return meta;
+}
+function RouteClass<M = never>(meta: RootRouteInfo<M>, options: PreparedRouteOptions<M>) {
+	const info: RootRouteInfo<M> = Object.assign(
+		meta,
+		options
+	);
+
+	for (const i in info.routes) {
+		const route = info.routes[i];
 		if (!route) continue;
 
 		const path = route.path.startsWith("/") || route.path.startsWith("\\") ? '.' + route.path : route.path;
-		route.path = resolve(t.path, path);
+		route.path = resolve(info.path, path);
 
-		if (options.methods !== "ALL") {
-			if (route.methods == "ALL") {
-				route.methods = options.methods;
-			} else {
-				route.methods = route.methods.filter(method => options.methods.indexOf(method) != -1)
-			}
-		}
-		t.routes[i] = route;
+		if (info.methods == "ALL") continue;
+
+		if (route.methods == "ALL") route.methods = info.methods.concat();
+		else route.methods = route.methods.filter(method => info.methods.indexOf(method) != -1);
+
 	}
 
-	Reflect.defineMetadata(Reflect.Controller, t, target);
+	return info;
 }
 
 export default Route;
-export { HttpMethod, ControllerMeta, RouteMeta };
+export {
+	RouteInfo, HttpMethod, RootRouteInfo, RouteOptions, RouteDecorator,
+
+	prepareRouteOptions,
+	getRootRouteInfo,
+	RouteMethod,
+	RouteClass
+}
