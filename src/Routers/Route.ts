@@ -109,7 +109,9 @@ function Route<M = never>(path_or_options: string | RouteOptions<M>, name: strin
 
 function prepareMethods(methods: SingleOrArray<HttpMethod> = "ALL"): HttpMethod[] | "ALL" {
 	if (!Array.isArray(methods))
-		return methods == "ALL" ? methods : [methods];
+		return methods == "ALL" ? methods : [<HttpMethod>methods.toUpperCase()];
+	else
+		methods = methods.map(e => <HttpMethod>e.toUpperCase());
 
 	if (methods.indexOf("ALL") != -1)
 		return "ALL";
@@ -160,6 +162,7 @@ export {
 	RouteInfo, HttpMethod, RootRouteInfo, RouteOptions, RouteDecorator,
 
 	prepareRouteOptions,
+	prepareMethods,
 	getRootRouteInfo,
 	RouteMethod,
 	RouteClass

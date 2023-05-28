@@ -20,7 +20,7 @@ declare global {
 	}
 }
 
-Reflect.Error = "@wulfy,error";
+Reflect.Error = "@wulfy.error";
 
 interface ErrorOptions extends RouteOptions<SingleOrArray<ErrorCode>> { }
 
@@ -48,6 +48,8 @@ function prepareErrorRouteOptions(code_or_options: SingleOrArray<ErrorCode> | Er
 	};
 }
 
+type PreparedErrorCode = ErrorCode[] | -1;
+
 function ErrorRoute(code: SingleOrArray<ErrorCode>, name?: string, path?: string, methods?: SingleOrArray<HttpMethod>): RouteDecorator;
 function ErrorRoute(options: RouteOptions<ErrorCode[]>): RouteDecorator;
 function ErrorRoute(code_or_options: SingleOrArray<ErrorCode> | ErrorOptions, name?: string, path?: string, methods?: SingleOrArray<HttpMethod>): RouteDecorator {
@@ -56,15 +58,15 @@ function ErrorRoute(code_or_options: SingleOrArray<ErrorCode> | ErrorOptions, na
 		const options = prepareErrorRouteOptions(code_or_options, name, path || target instanceof Controller ? "(.*)" : "", methods);
 
 		const reftarget: typeof Controller = target instanceof Controller ? <typeof Controller>target.constructor : target;
-		let meta = getRootRouteInfo<ErrorCode[]>(reftarget, Reflect.Error);
-		meta.meta = meta.meta || [{ min: 0, max: 999 }];
+		let meta = getRootRouteInfo<PreparedErrorCode>(reftarget, Reflect.Error);
+		meta.meta = meta.meta || -1;
 
 
-		meta = target instanceof Controller ? RouteMethod<ErrorCode[]>(meta, propertyKey, options) : RouteClass<ErrorCode[]>(meta, options);
+		meta = target instanceof Controller ? RouteMethod<PreparedErrorCode>(meta, propertyKey, options) : RouteClass<PreparedErrorCode>(meta, options);
 
 		Reflect.defineMetadata(Reflect.Error, meta, reftarget);
 	};
 }
 
 export default ErrorRoute;
-export { ErrorCode };
+export { ErrorCode, PreparedErrorCode };
