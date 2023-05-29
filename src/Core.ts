@@ -27,10 +27,10 @@ class Core {
 	private configured: boolean = false;
 	private readonly config: Config;
 
-	protected readonly router: Router = new Router();
+	protected readonly router: Router = Router.getInstance();
 	protected readonly staticRouter: StaticRouter = new StaticRouter();
-	protected readonly errorRouter: ErrorRouter = new ErrorRouter();
-	protected readonly serviceList: ServiceList = new ServiceList();
+	protected readonly errorRouter: ErrorRouter = ErrorRouter.getInstance();
+	protected readonly serviceList: ServiceList = ServiceList.getInstance();
 	private constructor() {
 		this.config = readConfig();
 		process.on("SIGINT", () => {
@@ -76,7 +76,6 @@ class Core {
 			else
 				error = new HttpError(JSON.stringify(error), 500);
 		}
-
 		const errorHandler = await this.errorRouter.get(req, error);
 		try {
 			errorHandler(res, this.serviceList);
@@ -135,9 +134,9 @@ class Core {
 
 		const cfg = readConfig();
 
-		await this.router.configure(cfg.controllers);
-		await this.errorRouter.configure(cfg.error);
-		await this.serviceList.configure(cfg.services);
+		await this.router.load(cfg.controllers);
+		await this.errorRouter.load(cfg.error);
+		await this.serviceList.load(cfg.services);
 		this.staticRouter.configure(cfg.static);
 
 		this.serviceList.registerService("nunjucks", new NunjucksService());

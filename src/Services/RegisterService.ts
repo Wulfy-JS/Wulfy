@@ -7,7 +7,7 @@ declare global {
 	}
 }
 
-Reflect.Service = "@service";
+Reflect.Service = "@wulfy.service";
 function RegisterService(name: string) {
 	return (target: typeof Service) => {
 		Reflect.defineMetadata(Reflect.Service, name, target);

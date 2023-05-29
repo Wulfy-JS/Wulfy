@@ -10,7 +10,7 @@ import { ErrorCode, PreparedErrorCode } from "./ErrorRoute";
 
 class ErrorRouter extends Router<PreparedErrorCode, HttpError> {
 	private template = nunjucks.compile(readFileSync(getWulfyPath("views/error.njk"), { encoding: "utf-8" }));
-	protected readonly keyMeta: string = Reflect.Error;
+	protected readonly metaKey: string = Reflect.Error;
 
 	protected checkRoute(info: RouteInfo<PreparedErrorCode>, req: IncomingMessage, meta?: HttpError): boolean {
 		if (info.meta === undefined || !meta) return false;

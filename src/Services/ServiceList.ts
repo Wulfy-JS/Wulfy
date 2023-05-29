@@ -1,6 +1,7 @@
 import loadModule from "../utils/loadModule";
 import { glob } from "glob";
 import Service from "./Service";
+import Loader from "../Loader";
 
 class ServiceList {
 	private list: Map<string, Service> = new Map();
@@ -49,4 +50,32 @@ class ServiceList {
 	}
 }
 
-export default ServiceList;
+
+class ServiceLoader extends Loader<Constructor<typeof Service>, string>{
+	private list: Map<string, Service> = new Map();
+	protected readonly metaKey: string = Reflect.Service;
+
+	protected register(clazz: Constructor<typeof Service>, meta: string, name: string, path: string): void {
+		this.registerService(meta, new clazz());
+	}
+
+	public registerService(name: string, service: Service) {
+		if (!service) throw new Error(`You don't resive Service`);
+		const s = this.list.get(name);
+		if (s) throw new Error(`Service "${name}" was been register`)
+		this.list.set(name, service);
+	}
+
+	public get(name: string): Service {
+		const s = this.list.get(name);
+		if (s) return s;
+		throw new Error(`Unknown service "${name}"`)
+	}
+
+	public emit(eventName: string | symbol, ...args: any[]): this {
+		this.list.forEach(e => e.emit(eventName, ...args));
+		return this;
+	}
+}
+
+export default ServiceLoader;
