@@ -81,15 +81,7 @@ function prepareRouteOptions<M = never>(path_or_options: string | RouteOptions<M
 
 }
 
-
-
-declare global {
-	namespace Reflect {
-		let Controller: string;
-	}
-}
-
-Reflect.Controller = "@wulfy.controller";
+const MetaController = "@wulfy.controller";
 
 function Route<M = never>(path: string, name: string, methods?: SingleOrArray<HttpMethod>, meta?: M): RouteDecorator;
 function Route<M = never>(options: RouteOptions<M>): RouteDecorator;
@@ -103,7 +95,7 @@ function Route<M = never>(path_or_options: string | RouteOptions<M>, name: strin
 
 		meta = target instanceof Controller ? RouteMethod<M>(meta, propertyKey, options) : RouteClass<M>(meta, options);
 
-		Reflect.defineMetadata(Reflect.Controller, meta, reftarget);
+		Reflect.defineMetadata(MetaController, meta, reftarget);
 	};
 }
 
@@ -119,7 +111,7 @@ function prepareMethods(methods: SingleOrArray<HttpMethod> = "ALL"): HttpMethod[
 	return methods;
 }
 
-function getRootRouteInfo<M = never>(target: typeof Controller, metadata: string = Reflect.Controller): RootRouteInfo<M> {
+function getRootRouteInfo<M = never>(target: typeof Controller, metadata: string = MetaController): RootRouteInfo<M> {
 	return Reflect.getMetadata(metadata, target) || {
 		name: target.name,
 		path: "/",
@@ -160,6 +152,8 @@ function RouteClass<M = never>(meta: RootRouteInfo<M>, options: PreparedRouteOpt
 export default Route;
 export {
 	RouteInfo, HttpMethod, RootRouteInfo, RouteOptions, RouteDecorator,
+
+	MetaController,
 
 	prepareRouteOptions,
 	prepareMethods,

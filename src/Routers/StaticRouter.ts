@@ -10,7 +10,7 @@ type StaticRouterList = Map<string, Set<string>>;
 class StaticRouter {
 	private routes: StaticRouterList = new Map();
 
-	public configure(config: StaticRouterConfig) {
+	public load(config: StaticRouterConfig) {
 		this.routes.clear();
 
 		for (const url in config) {
@@ -28,7 +28,7 @@ class StaticRouter {
 
 	}
 
-	public getRoute(url_file: string) {
+	public get(url_file: string) {
 		for (const [url, paths] of this.routes.entries()) {
 			if (!url_file.startsWith(url)) continue;
 			url_file = url_file.slice(url.length)

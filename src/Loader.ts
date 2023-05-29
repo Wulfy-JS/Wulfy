@@ -1,12 +1,17 @@
 import { glob } from "glob";
 
 import loadModule from "./utils/loadModule";
+import Config from "./Config";
 
 abstract class Loader<C extends new (...args: any) => any, M> {
 	protected abstract readonly metaKey: string;
+	protected abstract readonly cfgPath: string;
+	protected readonly cfgDefault: SingleOrArray<string> = [];
 	protected constructor() { }
 
-	public async load(paths: SingleOrArray<string>) {
+	private async getFiles() {
+		let paths = Config.get<SingleOrArray<string>>(this.cfgPath, this.cfgDefault);
+
 		if (!Array.isArray(paths)) paths = [paths];
 
 		paths = paths.map(e => {
@@ -15,17 +20,25 @@ abstract class Loader<C extends new (...args: any) => any, M> {
 			if (e.endsWith("*")) return e + ".js";
 			if (e.endsWith("/") || e.endsWith("\\")) return e + "**/*.js";
 			return e + "/**/*.js";
-
-		})
-		const files = await glob(paths, { windowsPathsNoEscape: true });
-		await Promise.all(files.map(file => this.loadModule(file)));
+		});
+		return await glob(paths, { windowsPathsNoEscape: true });
 	}
 
-	protected async loadModule(path: string) {
+	public async configure(callback: () => void = () => { }) {
+		await this.load(await this.getFiles());
+		callback();
+	}
+
+	private async load(files: string[]) {
+		await Promise.all(files.map(file => this.loadModule(file)));
+	}
+	private async loadModule(path: string) {
 		const module = await loadModule(path);
+
 		for (const name in module) {
 			const exportedObject = module[name];
 			if (typeof exportedObject !== "function") continue;
+
 			const meta: Undefined<M> = Reflect.getMetadata(this.metaKey, exportedObject);
 			if (!meta) continue;
 

@@ -1,6 +1,44 @@
 import { readFileSync } from "fs";
 import { isAbsolute, resolve } from "path";
 
+namespace Config {
+	let rawConfig: object; read();
+
+	function read() {
+		const configFile = process.env.CONFGI || "config.json";
+		rawConfig = JSON.parse(readFileSync(configFile, { encoding: 'utf-8' }));
+	}
+
+	export function get<T>(path: string): T | undefined;
+	export function get<T>(path: string, defValue: T): T;
+	export function get<T>(path: string, defValue?: T): T | undefined {
+		let object: any = rawConfig;
+		do {
+			const objetcKeys = Object.keys(object);
+			const _key =
+				objetcKeys.find((e) => path === e) ||
+				objetcKeys.find((e) => path.startsWith(e + "."));
+
+			if (!_key) return defValue;
+
+			if (!object.hasOwnProperty(_key)) return defValue;
+
+			object = object[_key];
+			if (!object) return defValue;
+
+			path = path.slice(_key.length + 1);
+			if (path === "")
+				return typeof object === "object"
+					&& typeof defValue === "object"
+					&& !Array.isArray(object)
+					&& !Array.isArray(defValue) ? Object.assign({}, defValue, object) : object;
+		} while (path !== "");
+		return defValue;
+	}
+
+}
+
+
 type RawControllerConfig = Undefined<SingleOrArray<string>>;
 type ControllerConfig = string[];
 type RawStaticConfig = Undefined<NodeJS.Dict<SingleOrArray<string>>>;
@@ -31,7 +69,7 @@ interface RawConfig {
 	services?: RawControllerConfig;
 }
 
-interface Config {
+interface IConfig {
 	server: ServerConfig;
 	controllers: ControllerConfig;
 	static: StaticConfig;
@@ -80,9 +118,9 @@ function prepareServerConfig(config: RawServerConfig = {}): ServerConfig {
 
 
 const defaultConfigFile = "config.json";
-function readConfig(): Config {
+function readConfig(): IConfig {
 	const rawConfig: RawConfig = JSON.parse(readFileSync(defaultConfigFile, { encoding: 'utf-8' }));
-	const config: Config = {
+	const config: IConfig = {
 		controllers: prepareControllerConfig(rawConfig.controllers, ["./controllers/**/*.js"]),
 		static: prepareStaticConfig(rawConfig.static),
 		error: prepareControllerConfig(rawConfig.error),
@@ -96,5 +134,5 @@ function isTLSServerConfig(cfg: ServerConfig): cfg is TLSServerConfig {
 	return !!((<TLSServerConfig>cfg).private_key && (<TLSServerConfig>cfg).certificate);
 }
 
-export default readConfig;
-export { Config, isTLSServerConfig, TLSServerConfig };
+export default Config;
+export { IConfig, readConfig, isTLSServerConfig, TLSServerConfig };

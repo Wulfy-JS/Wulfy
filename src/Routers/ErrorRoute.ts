@@ -14,13 +14,9 @@ interface RangeCode {
 }
 type ErrorCode = number | RangeCode;
 
-declare global {
-	namespace Reflect {
-		let Error: string;
-	}
-}
 
-Reflect.Error = "@wulfy.error";
+
+const MetaError = "@wulfy.error";
 
 interface ErrorOptions extends RouteOptions<SingleOrArray<ErrorCode>> { }
 
@@ -58,15 +54,15 @@ function ErrorRoute(code_or_options: SingleOrArray<ErrorCode> | ErrorOptions, na
 		const options = prepareErrorRouteOptions(code_or_options, name, path || target instanceof Controller ? "(.*)" : "", methods);
 
 		const reftarget: typeof Controller = target instanceof Controller ? <typeof Controller>target.constructor : target;
-		let meta = getRootRouteInfo<PreparedErrorCode>(reftarget, Reflect.Error);
+		let meta = getRootRouteInfo<PreparedErrorCode>(reftarget, MetaError);
 		meta.meta = meta.meta || -1;
 
 
 		meta = target instanceof Controller ? RouteMethod<PreparedErrorCode>(meta, propertyKey, options) : RouteClass<PreparedErrorCode>(meta, options);
 
-		Reflect.defineMetadata(Reflect.Error, meta, reftarget);
+		Reflect.defineMetadata(MetaError, meta, reftarget);
 	};
 }
 
 export default ErrorRoute;
-export { ErrorCode, PreparedErrorCode };
+export { ErrorCode, PreparedErrorCode, MetaError };

@@ -6,11 +6,14 @@ import HttpError from "../HttpError";
 import ServiceList from "../Services/ServiceList";
 import { readFileSync } from "node:fs";
 import getWulfyPath from "../utils/getWulfyPath";
-import { ErrorCode, PreparedErrorCode } from "./ErrorRoute";
+import { ErrorCode, MetaError, PreparedErrorCode } from "./ErrorRoute";
 
 class ErrorRouter extends Router<PreparedErrorCode, HttpError> {
 	private template = nunjucks.compile(readFileSync(getWulfyPath("views/error.njk"), { encoding: "utf-8" }));
-	protected readonly metaKey: string = Reflect.Error;
+
+	protected readonly metaKey: string = MetaError;
+	protected readonly cfgPath: string = "error";
+	protected readonly cfgDefault: SingleOrArray<string> = [];
 
 	protected checkRoute(info: RouteInfo<PreparedErrorCode>, req: IncomingMessage, meta?: HttpError): boolean {
 		if (info.meta === undefined || !meta) return false;

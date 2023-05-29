@@ -1,6 +1,6 @@
-import Core from "./Core";
+import Server from "./Server";
 
-export { default as Core } from "./Core"
+export { default as Server } from "./Server"
 export { default as Controller } from "./Controller";
 export { default as Route } from "./Routers/Route";
 export { default as HttpError } from "./HttpError";
@@ -10,5 +10,5 @@ export { default as RegisterService } from "./Services/RegisterService";
 
 
 export default function run() {
-	Core.getInstance().start();
+	Server.Instance.start();
 }
