@@ -1,15 +1,17 @@
 import { ServerResponse } from "http";
-import Config from "./Config";
-import ErrorRouter from "./Routers/ErrorRouter";
-import Router from "./Routers/Router";
-import StaticRouter from "./Routers/StaticRouter";
-import HttpServer from "./Server/HttpServer";
-import HttpsServer from "./Server/HttpsServer";
-import ServiceList from "./Services/ServiceList";
+import Config from "../Config";
+import ErrorRouter from "../Routers/ErrorRouter";
+import Router from "../Routers/Router";
+import StaticRouter from "../Routers/StaticRouter";
+import HttpServer from "./HttpServer";
+import HttpsServer from "./HttpsServer";
+import ServiceList from "../Services/ServiceList";
 import { IncomingMessage } from "http";
-import { existsSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { TLSSocket } from "tls";
-import HttpError from "./HttpError";
+import HttpError from "../HttpError";
+import { URL } from "url";
+import NunjucksService from "../Services/Nunjucks";
 
 interface BaseServerConfig {
 	http_port: number;
@@ -24,7 +26,19 @@ interface TLSServerConfig extends BaseServerConfig {
 type ServerConfig = BaseServerConfig | TLSServerConfig;
 
 function isTLSServerConfig(cfg: any): cfg is TLSServerConfig {
-	return !!cfg.private_key && !!cfg.certificate && !!cfg.https_port
+	return !!cfg.private_key && !!cfg.certificate;
+}
+
+function prepareConfig(config: Partial<ServerConfig> = {}): ServerConfig {
+	return {
+		http_port: config.http_port ?? 80,
+		...isTLSServerConfig(config) ? {
+			https_port: config.https_port ?? 443,
+			certificate: config.certificate,
+			private_key: config.private_key,
+			tls_redirect: config.tls_redirect ?? true
+		} : {}
+	};
 }
 
 class Server {
@@ -43,8 +57,9 @@ class Server {
 	}
 
 	private async onRequest(req: IncomingMessage, res: ServerResponse) {
+		this.serviceList.emit("request", req, res);
 		req.secure = req.socket instanceof TLSSocket ? req.socket.encrypted : false;
-		console.log(this.router, this.errorRouter)
+
 		const controller = await this.router.get(req);
 		if (controller !== false) {
 			try {
@@ -74,6 +89,8 @@ class Server {
 			else
 				error = new HttpError(JSON.stringify(error), 500);
 		}
+
+		this.serviceList.emit("error", req, res, error);
 		const errorHandler = await this.errorRouter.get(req, error);
 		try {
 			errorHandler(res, this.serviceList);
@@ -100,11 +117,7 @@ class Server {
 	}
 
 	protected async configure(callback: () => void = () => { }) {
-		this.cfg = Config.get<ServerConfig>("server", {
-			http_port: 80,
-			https_port: 443,
-			tls_redirect: true
-		});
+		this.cfg = prepareConfig(Config.get("server"));
 		this.httpServer = new HttpServer();
 
 		if (isTLSServerConfig(this.cfg)) {
@@ -121,11 +134,14 @@ class Server {
 		Promise.all([
 			new Promise<void>(r => this.router.configure(r)),
 			new Promise<void>(r => this.errorRouter.configure(r)),
-			new Promise<void>(r => this.serviceList.configure(r)),
-		]).then(callback)
-		// this.staticRouter.load(cfg.static);
+			new Promise<void>(r => this.serviceList.configure(() => {
+				r();
+				this.serviceList.registerService("nunjucks", new NunjucksService())
+				this.serviceList.emit("loaded");
+			})),
+			new Promise<void>(r => this.staticRouter.configure(r)),
+		]).then(callback);
 
-		// this.serviceList.registerService("nunjucks", new NunjucksService());
 
 
 
@@ -140,7 +156,10 @@ class Server {
 		Promise.all([
 			new Promise<void>(r => this.httpServer ? this.httpServer.listen(this.cfg?.http_port, r) : r()),
 			new Promise<void>(r => this.httpsServer ? this.httpsServer.listen(this.cfg?.https_port, r) : r())
-		]).then(callback);
+		]).then(() => {
+			this.serviceList.emit("start");
+			callback();
+		});
 
 		return this;
 	}
@@ -148,7 +167,10 @@ class Server {
 		Promise.all([
 			new Promise<void>((r) => this.httpServer ? this.httpServer.close(() => { this.httpServer = null; r() }) : r()),
 			new Promise<void>((r) => this.httpsServer ? this.httpsServer.close(() => { this.httpsServer = null; r() }) : r())
-		]).then(callback)
+		]).then(() => {
+			this.serviceList.emit("stop");
+			callback();
+		})
 
 		return this;
 	}

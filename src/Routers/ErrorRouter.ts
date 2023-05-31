@@ -11,6 +11,7 @@ import { ErrorCode, MetaError, PreparedErrorCode } from "./ErrorRoute";
 class ErrorRouter extends Router<PreparedErrorCode, HttpError> {
 	private template = nunjucks.compile(readFileSync(getWulfyPath("views/error.njk"), { encoding: "utf-8" }));
 
+	protected readonly cachePath: string = ".error";
 	protected readonly metaKey: string = MetaError;
 	protected readonly cfgPath: string = "error";
 	protected readonly cfgDefault: SingleOrArray<string> = [];

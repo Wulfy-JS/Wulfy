@@ -1,10 +1,10 @@
 import Controller from "../Controller";
 import {
 	RouteDecorator, RouteOptions,
-	prepareRouteOptions,
 	getRootRouteInfo,
 	RouteMethod,
-	RouteClass
+	RouteClass,
+	prepareRouteInfo
 } from "./Route";
 import { HttpMethod } from "./Route";
 
@@ -31,36 +31,39 @@ function isErrorCode(obj: any): obj is SingleOrArray<ErrorCode> {
 	return false;
 }
 
-
-function prepareErrorRouteOptions(code_or_options: SingleOrArray<ErrorCode> | ErrorOptions, name?: string, path?: string, methods?: SingleOrArray<HttpMethod>) {
-	const opts = isErrorCode(code_or_options) ? prepareRouteOptions(path || "/", name, methods, code_or_options) : prepareRouteOptions(code_or_options)
-	if (!opts.meta) throw new ReferenceError("ErrorCode not defined");
-
-	return {
-		name: opts.name,
-		path: opts.path,
-		methods: opts.methods,
-		meta: Array.isArray(opts.meta) ? opts.meta : [opts.meta]
-	};
+function prepareErrorCode(error: SingleOrArray<ErrorCode>): PreparedErrorCode {
+	if (Array.isArray(error)) {
+		if (error.indexOf(-1) != -1)
+			return -1;
+		return error
+	} else {
+		if (error == -1) return -1;
+		return [error];
+	}
 }
 
 type PreparedErrorCode = ErrorCode[] | -1;
 
-function ErrorRoute(code: SingleOrArray<ErrorCode>, name?: string, path?: string, methods?: SingleOrArray<HttpMethod>): RouteDecorator;
+function ErrorRoute(code?: SingleOrArray<ErrorCode>, name?: string, path?: string, methods?: SingleOrArray<HttpMethod>): RouteDecorator;
 function ErrorRoute(options: RouteOptions<ErrorCode[]>): RouteDecorator;
-function ErrorRoute(code_or_options: SingleOrArray<ErrorCode> | ErrorOptions, name?: string, path?: string, methods?: SingleOrArray<HttpMethod>): RouteDecorator {
-	return (target: typeof Controller | Controller, propertyKey: string = "") => {
-
-		const options = prepareErrorRouteOptions(code_or_options, name, path || target instanceof Controller ? "(.*)" : "", methods);
-
-		const reftarget: typeof Controller = target instanceof Controller ? <typeof Controller>target.constructor : target;
-		let meta = getRootRouteInfo<PreparedErrorCode>(reftarget, MetaError);
-		meta.meta = meta.meta || -1;
+function ErrorRoute(code_or_options: SingleOrArray<ErrorCode> | ErrorOptions = -1, name: string = "", path: string = "/(.*)", methods: SingleOrArray<HttpMethod> = "ALL"): RouteDecorator {
+	return (target: typeof Controller | Controller, propertyKey?: string) => {
+		target = target instanceof Controller ? <typeof Controller>target.constructor : target;
+		let metaTarget = getRootRouteInfo<PreparedErrorCode>(target, MetaError, -1);
 
 
-		meta = target instanceof Controller ? RouteMethod<PreparedErrorCode>(meta, propertyKey, options) : RouteClass<PreparedErrorCode>(meta, options);
+		const options = isErrorCode(code_or_options)
+			? prepareRouteInfo<PreparedErrorCode>(path, name, methods, prepareErrorCode(code_or_options))
+			: prepareRouteInfo<PreparedErrorCode>(
+				code_or_options.path ?? "/(.*)",
+				code_or_options.name ?? (propertyKey ?? target.name),
+				code_or_options.methods ?? "ALL",
+				prepareErrorCode(code_or_options.meta ?? -1)
+			);
 
-		Reflect.defineMetadata(MetaError, meta, reftarget);
+		metaTarget = propertyKey ? RouteMethod<PreparedErrorCode>(metaTarget, propertyKey, options) : RouteClass<PreparedErrorCode>(metaTarget, options);
+
+		Reflect.defineMetadata(MetaError, metaTarget, target);
 	};
 }
 

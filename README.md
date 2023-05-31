@@ -19,7 +19,11 @@ Example config-file:
 		// File with Private Key for HTTPS-Server (Optional. Required with "certificate")
 		"private_key": "path/to/file.key",
 		// File with Certificate for HTTPS-Server (Optional. Required with "private_key")
-		"certificate": "path/to/file.cert"
+		"certificate": "path/to/file.cert",
+		// Amount of CPU used.
+		// If 0 is specified, the maximum possible will be used.
+		// If higher than possible is specified, the maximum possible will be used.
+		"cpus": 0
 	},
 	// Path to controllers
 	"controllers": [
@@ -49,9 +53,9 @@ Example config-file:
 - [x] Statics Router
 - [x] Errors Router
 - [x] Services (templates, models, etc.)
-- [ ] Clusters
+- [x] Clusters
 - [ ] External modules
-- [ ] Variables for Config-File
+- [x] Variables for Config-File
 - [ ] CLI
 - [ ] Lifecicle
 

@@ -1,6 +1,7 @@
 {
 	"server": {
-		"http_port": 8080
+		"http_port": 8080,
+		"cpus": 1
 	},
 	"controllers": [
 		"dist/test/controllers"

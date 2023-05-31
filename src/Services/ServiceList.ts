@@ -1,14 +1,15 @@
 import Service from "./Service";
-import Loader from "../Loader";
+import Loader, { Module } from "../Loader";
 import { MetaService } from "./RegisterService";
 
 class ServiceList extends Loader<Constructor<typeof Service>, string>{
+
 	private list: Map<string, Service> = new Map();
 	protected readonly metaKey: string = MetaService;
 	protected readonly cfgPath: string = "services";
 	protected readonly cfgDefault: SingleOrArray<string> = [];
 
-	protected register(clazz: Constructor<typeof Service>, meta: string, name: string, path: string): void {
+	protected register(clazz: Constructor<typeof Service>, meta: string, module: Module): void {
 		this.registerService(meta, new clazz());
 	}
 

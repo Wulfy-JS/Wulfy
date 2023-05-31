@@ -2,7 +2,12 @@ import { glob } from "glob";
 
 import loadModule from "./utils/loadModule";
 import Config from "./Config";
+import Cache from "./Cache";
 
+interface Module {
+	export: string;
+	path: string
+}
 abstract class Loader<C extends new (...args: any) => any, M> {
 	protected abstract readonly metaKey: string;
 	protected abstract readonly cfgPath: string;
@@ -15,6 +20,7 @@ abstract class Loader<C extends new (...args: any) => any, M> {
 		if (!Array.isArray(paths)) paths = [paths];
 
 		paths = paths.map(e => {
+			e = Config.prepareString(e);
 			if (e.endsWith(".js")) return e;
 			if (e.endsWith("**")) return e + "/*.js";
 			if (e.endsWith("*")) return e + ".js";
@@ -42,11 +48,12 @@ abstract class Loader<C extends new (...args: any) => any, M> {
 			const meta: Undefined<M> = Reflect.getMetadata(this.metaKey, exportedObject);
 			if (!meta) continue;
 
-			this.register(exportedObject, meta, name, path);
+			this.register(exportedObject, meta, { export: name, path });
 		}
 	}
 
-	protected abstract register(clazz: C, meta: M, name: string, path: string): void;
+	protected abstract register(clazz: C, meta: M, module: Module): void;
+
 
 	private static instance: Loader<any, any>;
 	public static getInstance<C extends new (...args: any) => any, M, L extends Loader<C, M>>(): L {
@@ -58,3 +65,4 @@ abstract class Loader<C extends new (...args: any) => any, M> {
 }
 
 export default Loader;
+export { Module }

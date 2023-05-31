@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { IncomingMessage, ServerResponse } from "http";
 
 import mime from "mime";
+import Config from "../Config";
 
 type StaticRouterConfig = NodeJS.Dict<string[]>;
 type StaticRouterList = Map<string, Set<string>>;
@@ -10,14 +11,15 @@ type StaticRouterList = Map<string, Set<string>>;
 class StaticRouter {
 	private routes: StaticRouterList = new Map();
 
-	public load(config: StaticRouterConfig) {
+	public configure(callback: () => void = () => { }) {
 		this.routes.clear();
-
-		for (const url in config) {
-			const rawPaths = config[url];
+		const cfg = <StaticRouterConfig>Config.get("static", {})
+		for (const url in cfg) {
+			const rawPaths = cfg[url];
 			if (!rawPaths) continue;
 			const paths: Set<string> = new Set();
-			for (const path of rawPaths) {
+			for (const rawPath of rawPaths) {
+				const path = Config.prepareString(rawPath);
 				if (!existsSync(path)) continue;
 				paths.add(path);
 			}
@@ -25,7 +27,7 @@ class StaticRouter {
 			if (paths.size > 0)
 				this.routes.set(url, paths);
 		}
-
+		callback();
 	}
 
 	public get(url_file: string) {

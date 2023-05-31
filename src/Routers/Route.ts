@@ -58,27 +58,13 @@ interface RouteOptions<M = never> {
 	meta?: M;
 }
 
-interface PreparedRouteOptions<M = never> {
-	path: string;
-	name?: string;
-
-	methods: HttpMethod[] | "ALL";
-
-	meta?: M;
-}
-
-
-function prepareRouteOptions<M = never>(path_or_options: string | RouteOptions<M>, name?: string, methods?: SingleOrArray<HttpMethod>, meta?: M): PreparedRouteOptions<M> {
-	if (typeof path_or_options === "string")
-		return {
-			name, path: path_or_options, methods: prepareMethods(methods), meta
-		}
-
-	return Object.assign(path_or_options, {
-		methods: prepareMethods(path_or_options.methods)
-	});
-
-
+function prepareRouteInfo<M = never>(path: string, name: string, methods: SingleOrArray<HttpMethod>, meta?: M): RouteInfo<M> {
+	return {
+		path,
+		name,
+		methods: prepareMethods(methods),
+		meta,
+	}
 }
 
 const MetaController = "@wulfy.controller";
@@ -86,16 +72,23 @@ const MetaController = "@wulfy.controller";
 function Route<M = never>(path: string, name: string, methods?: SingleOrArray<HttpMethod>, meta?: M): RouteDecorator;
 function Route<M = never>(options: RouteOptions<M>): RouteDecorator;
 function Route<M = never>(path_or_options: string | RouteOptions<M>, name: string = "", methods: SingleOrArray<HttpMethod> = "ALL", meta?: M): RouteDecorator {
-	const options = prepareRouteOptions<M>(path_or_options, name, methods, meta);
-
-	return (target: typeof Controller | Controller, propertyKey: string = "") => {
-		const reftarget: typeof Controller = target instanceof Controller ? <typeof Controller>target.constructor : target;
-		let meta = getRootRouteInfo<M>(reftarget);
+	return (target: typeof Controller | Controller, propertyKey?: string) => {
+		target = target instanceof Controller ? <typeof Controller>target.constructor : target;
+		let metaTarget = getRootRouteInfo<M>(target, MetaController);
 
 
-		meta = target instanceof Controller ? RouteMethod<M>(meta, propertyKey, options) : RouteClass<M>(meta, options);
+		const options = typeof path_or_options == "string"
+			? prepareRouteInfo<M>(path_or_options, name, methods, meta)
+			: prepareRouteInfo<M>(
+				path_or_options.path,
+				path_or_options.name ?? (propertyKey ?? target.name),
+				path_or_options.methods ?? "ALL",
+				meta
+			);
 
-		Reflect.defineMetadata(MetaController, meta, reftarget);
+		metaTarget = propertyKey ? RouteMethod<M>(metaTarget, propertyKey, options) : RouteClass<M>(metaTarget, options);
+
+		Reflect.defineMetadata(MetaController, metaTarget, target);
 	};
 }
 
@@ -111,22 +104,23 @@ function prepareMethods(methods: SingleOrArray<HttpMethod> = "ALL"): HttpMethod[
 	return methods;
 }
 
-function getRootRouteInfo<M = never>(target: typeof Controller, metadata: string = MetaController): RootRouteInfo<M> {
+function getRootRouteInfo<M = never>(target: typeof Controller, metadata: string, meta?: M): RootRouteInfo<M> {
 	return Reflect.getMetadata(metadata, target) || {
 		name: target.name,
 		path: "/",
 		methods: "ALL",
-		routes: {}
+		routes: {},
+		meta
 	};
 }
 
 
-function RouteMethod<M = never>(meta: RootRouteInfo<M>, method: string, routeInfo: PreparedRouteOptions<M>) {
+function RouteMethod<M = never>(meta: RootRouteInfo<M>, method: string, routeInfo: RouteInfo<M>) {
 	meta.routes[method] = Object.assign({ name: method }, routeInfo);
 
 	return meta;
 }
-function RouteClass<M = never>(meta: RootRouteInfo<M>, options: PreparedRouteOptions<M>) {
+function RouteClass<M = never>(meta: RootRouteInfo<M>, options: RouteInfo<M>) {
 	const info: RootRouteInfo<M> = Object.assign(
 		meta,
 		options
@@ -155,7 +149,7 @@ export {
 
 	MetaController,
 
-	prepareRouteOptions,
+	prepareRouteInfo,
 	prepareMethods,
 	getRootRouteInfo,
 	RouteMethod,
