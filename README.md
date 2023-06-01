@@ -43,7 +43,16 @@ Example config-file:
 	"error": [
 		"path/to/controllers",
 		"controllers/error.js",
-	]
+	],
+	// Config for importing external modules.
+	// Can be an array of strings with module names (See modules.names)
+	"modules": {
+		// Additional paths to search for modules.
+		// Should not include "node_modules", because it is included automatically
+		"pathsSearch": ["./modules"],
+		// The name of the folders with the necessary modules. Usually corresponds to the module name
+		"names": ["test_module"]
+	}
 }
 
 ```
@@ -54,7 +63,7 @@ Example config-file:
 - [x] Errors Router
 - [x] Services (templates, models, etc.)
 - [x] Clusters
-- [ ] External modules
+- [x] External modules
 - [x] Variables for Config-File
 - [ ] CLI
 - [ ] Lifecicle
