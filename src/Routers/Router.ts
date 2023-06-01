@@ -6,23 +6,27 @@ import loadModule from "../utils/loadModule";
 import { HttpMethod, MetaController, RootRouteInfo, RouteInfo, prepareRouteInfo } from "./Route";
 import Controller from "../Controller";
 import ServiceList from "../Services/ServiceList";
-import Loader, { Module } from "../Loader";
+import Loader, { ExportObjectInfo } from "../Loader";
 import { URL } from "url";
 import { parse } from "path";
 import Cache from "../Cache";
 
 
 interface ControllerInfo<M = never> extends RootRouteInfo<M> {
-	module: Module;
+	module: ExportObjectInfo;
 }
 
 class Router<M = never, G = M> extends Loader<Constructor<typeof Controller>, RootRouteInfo<M>> {
 	private list: Set<ControllerInfo<M>> = new Set();
-	protected readonly metaKey: string = MetaController;
-	protected readonly cfgPath: string = "controllers";
-	protected readonly cfgDefault: SingleOrArray<string> = ["./controllers/**/*.js"];
+	protected constructor(
+		metaKey: string,
+		cfgPath: string,
+		cfgDefault: SingleOrArray<string>,
+		protected readonly cachePath: string
+	) {
+		super(metaKey, cfgPath, cfgDefault);
+	}
 
-	protected readonly cachePath: string = ".controllers";
 	protected registerFromCache(raw: Buffer): boolean {
 		try {
 			const data: ControllerInfo<M>[] = JSON.parse(raw.toString());
@@ -90,7 +94,7 @@ class Router<M = never, G = M> extends Loader<Constructor<typeof Controller>, Ro
 		}
 	}
 
-	protected register(clazz: Constructor<typeof Controller>, meta: RootRouteInfo<M>, module: Module): void {
+	protected register(clazz: Constructor<typeof Controller>, meta: RootRouteInfo<M>, module: ExportObjectInfo): void {
 		this.list.add(Object.assign(
 			{},
 			meta,
@@ -140,6 +144,10 @@ class Router<M = never, G = M> extends Loader<Constructor<typeof Controller>, Ro
 		return false;
 	}
 
+	protected static _router = new Router(MetaController, "controllers", ['./controllers/**/*.js'], ".controllers");
+	public static get Router() {
+		return this._router;
+	}
 }
 
 export default Router;

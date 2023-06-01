@@ -2,24 +2,33 @@ import { glob } from "glob";
 
 import loadModule from "./utils/loadModule";
 import Config from "./Config";
-import Cache from "./Cache";
-
-interface Module {
+import Modules from "./Modules";
+interface ExportObjectInfo {
 	export: string;
 	path: string
 }
+
+// interface ModulesConfig {
+// 	pathsSearch: string[];
+// 	names: string[]
+// };
+// type Modules = ModulesConfig | string[]
+
+
+
 abstract class Loader<C extends new (...args: any) => any, M> {
-	protected abstract readonly metaKey: string;
-	protected abstract readonly cfgPath: string;
-	protected readonly cfgDefault: SingleOrArray<string> = [];
-	protected constructor() { }
+	protected constructor(
+		protected readonly metaKey: string,
+		protected readonly cfgPath: string,
+		protected readonly cfgDefault: SingleOrArray<string> = [],
+	) { }
 
 	private async getFiles() {
 		let paths = Config.get<SingleOrArray<string>>(this.cfgPath, this.cfgDefault);
-
 		if (!Array.isArray(paths)) paths = [paths];
 
-		paths = paths.map(e => {
+		paths = paths.concat(Modules.get(this.cfgPath)).map(e => {
+			// paths = paths.map(e => {
 			e = Config.prepareString(e);
 			if (e.endsWith(".js")) return e;
 			if (e.endsWith("**")) return e + "/*.js";
@@ -27,6 +36,7 @@ abstract class Loader<C extends new (...args: any) => any, M> {
 			if (e.endsWith("/") || e.endsWith("\\")) return e + "**/*.js";
 			return e + "/**/*.js";
 		});
+		console.log("getFiles", this.cfgPath + ":", paths)
 		return await glob(paths, { windowsPathsNoEscape: true });
 	}
 
@@ -52,17 +62,8 @@ abstract class Loader<C extends new (...args: any) => any, M> {
 		}
 	}
 
-	protected abstract register(clazz: C, meta: M, module: Module): void;
-
-
-	private static instance: Loader<any, any>;
-	public static getInstance<C extends new (...args: any) => any, M, L extends Loader<C, M>>(): L {
-		//@ts-ignore
-		if (!this.instance || !(this.instance instanceof this)) this.instance = new this();
-		//@ts-ignore
-		return this.instance;
-	}
+	protected abstract register(clazz: C, meta: M, module: ExportObjectInfo): void;
 }
 
 export default Loader;
-export { Module }
+export { ExportObjectInfo }

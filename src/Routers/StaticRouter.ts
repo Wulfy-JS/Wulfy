@@ -10,6 +10,7 @@ type StaticRouterList = Map<string, Set<string>>;
 
 class StaticRouter {
 	private routes: StaticRouterList = new Map();
+	protected constructor() { }
 
 	public configure(callback: () => void = () => { }) {
 		this.routes.clear();
@@ -48,6 +49,11 @@ class StaticRouter {
 		}
 
 		return false;
+	}
+
+	private static _staticRouter = new StaticRouter();
+	public static get StaticRouter() {
+		return this._staticRouter;
 	}
 }
 

@@ -46,10 +46,10 @@ class Server {
 	private httpsServer: Nullable<HttpsServer> = null;
 	private cfg: Nullable<ServerConfig> = null;
 
-	protected readonly router: Router = Router.getInstance();
-	protected readonly staticRouter: StaticRouter = new StaticRouter();
-	protected readonly errorRouter: ErrorRouter = ErrorRouter.getInstance();
-	protected readonly serviceList: ServiceList = ServiceList.getInstance();
+	protected readonly router: Router = Router.Router;
+	protected readonly staticRouter: StaticRouter = StaticRouter.StaticRouter
+	protected readonly errorRouter: ErrorRouter = ErrorRouter.ErrorRouter;
+	protected readonly serviceList: ServiceList = ServiceList.ServiceList;
 
 	protected constructor() {
 		this.onRequest = this.onRequest.bind(this);
@@ -90,7 +90,7 @@ class Server {
 				error = new HttpError(JSON.stringify(error), 500);
 		}
 
-		this.serviceList.emit("error", req, res, error);
+		this.serviceList.emit("httperror", req, res, error);
 		const errorHandler = await this.errorRouter.get(req, error);
 		try {
 			errorHandler(res, this.serviceList);
@@ -139,7 +139,7 @@ class Server {
 				this.serviceList.registerService("nunjucks", new NunjucksService())
 				this.serviceList.emit("loaded");
 			})),
-			new Promise<void>(r => this.staticRouter.configure(r)),
+			// new Promise<void>(r => this.staticRouter.configure(r)),
 		]).then(callback);
 
 

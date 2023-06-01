@@ -11,11 +11,6 @@ import { ErrorCode, MetaError, PreparedErrorCode } from "./ErrorRoute";
 class ErrorRouter extends Router<PreparedErrorCode, HttpError> {
 	private template = nunjucks.compile(readFileSync(getWulfyPath("views/error.njk"), { encoding: "utf-8" }));
 
-	protected readonly cachePath: string = ".error";
-	protected readonly metaKey: string = MetaError;
-	protected readonly cfgPath: string = "error";
-	protected readonly cfgDefault: SingleOrArray<string> = [];
-
 	protected checkRoute(info: RouteInfo<PreparedErrorCode>, req: IncomingMessage, meta?: HttpError): boolean {
 		if (info.meta === undefined || !meta) return false;
 		if (info.meta == -1) return true;
@@ -50,6 +45,12 @@ class ErrorRouter extends Router<PreparedErrorCode, HttpError> {
 			stack: error.stack
 		}));
 		res.end()
+	}
+
+	// protected static _instance = 
+	protected static _errorRouter = new ErrorRouter(MetaError, "error", [], ".error");
+	public static get ErrorRouter() {
+		return this._errorRouter;
 	}
 }
 

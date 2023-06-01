@@ -16,7 +16,7 @@
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
     "start": "node --es-module-specifier-resolution=node dist/index.js",
-    "test": "node --experimental-modules  --experimental-import-meta-resolve --es-module-specifier-resolution=node dist/test/index.js | npx pino-pretty"
+    "test": "node --experimental-modules  --experimental-import-meta-resolve --es-module-specifier-resolution=node dist/test/index.js"
   },
   "devDependencies": {
     "@types/mime": "^3.0.1",
