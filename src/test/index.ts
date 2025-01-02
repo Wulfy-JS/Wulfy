@@ -1,5 +1,3 @@
-import run from "../index";
-import Modules from "../Modules";
+import App from "./App.js";
 
-// console.log(Modules.get("controllers"));
-run();
+App.getInstance().start();

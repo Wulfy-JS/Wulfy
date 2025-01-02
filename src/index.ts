@@ -1,19 +1,9 @@
-import getServerApp from "./App/getServerApp";
+import "reflect-metadata";
+import Wulfy from "./Wulfy.js";
 
-export { default as Server } from "./Server/Server"
-export { default as Controller } from "./Controller";
-export { default as Route } from "./Routers/Route";
-export { default as HttpError } from "./HttpError";
-export { default as ErrorRoute } from "./Routers/ErrorRoute";
-export { default as Service } from "./Services/Service";
-export { default as RegisterService } from "./Services/RegisterService";
-export { default as getServerApp } from "./App/getServerApp"
+export default Wulfy;
+export { Wulfy };
 
-
-export default function run() {
-	// if CLI
-	//     run CLI
-	// Else
-	//    run app
-	getServerApp().start();
-}
+export * from "./Wulfy.js";
+export * from "./Controller.js";
+export * from "./Router.js";

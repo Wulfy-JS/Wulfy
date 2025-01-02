@@ -1,6 +1,6 @@
 {
   "name": "wulfy",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Wulfy",
   "author": "80LK",
   "license": "MIT",
@@ -13,24 +13,17 @@
   "type": "module",
   "types": "types/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "watch": "tsc -p tsconfig.json --watch",
-    "start": "node --es-module-specifier-resolution=node dist/index.js",
-    "test": "node --experimental-modules  --experimental-import-meta-resolve --es-module-specifier-resolution=node dist/test/index.js"
+    "dev": "tsx watch src/test/index.ts",
+    "build": "tsc",
+    "start": "node dist/test/index.js"
   },
   "devDependencies": {
-    "@types/mime": "^3.0.1",
-    "@types/node": "^16.11.6",
-    "@types/nunjucks": "^3.2.0",
-    "pino-pretty": "^7.5.1",
-    "typescript": "^4.4.4"
+    "@types/node": "^20.12.8",
+    "tsx": "^4.19.2",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
-    "glob": "^10.1.0",
-    "mime": "^3.0.0",
-    "nunjucks": "^3.2.3",
-    "path-to-regexp": "^6.2.0",
-    "pino": "^7.6.5",
-    "reflect-metadata": "^0.1.13"
+    "mime": "^4.0.6",
+    "reflect-metadata": "^0.2.2"
   }
 }

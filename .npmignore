@@ -1,7 +1,4 @@
 dist/test
-public
+static
 src
 types/test
-.env
-config.json
-tsconfig.json

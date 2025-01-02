@@ -1,56 +1,37 @@
+
+import { Readable } from "stream";
+import { Request, Response } from "./Wulfy.js";
 import { createReadStream, existsSync } from "fs";
-import { IncomingMessage, ServerResponse } from "http";
+import mime from 'mime';
+import { extname } from "path";
+import sendStream from "./utils/sendStream.js";
 
-import mime from "mime";
-import ServiceList from "./Services/ServiceList";
-import Service from "./Services/Service";
+class Controller {
+	constructor(protected req: Request, protected res: Response) { }
 
-type Header = number | string | string[];
-type Headers = NodeJS.Dict<Header>;
-
-abstract class Controller {
-
-	constructor(
-		protected readonly request: IncomingMessage,
-		protected readonly response: ServerResponse,
-		private readonly services: ServiceList
-	) { }
-
-	//Alias for this.request
-	protected get req() { return this.request }
-	//Alias for this.response
-	protected get res() { return this.response }
-
-	//Send string or Buffer
-	protected text(data: string | Buffer, code: number = 200, headers: Headers = {}) {
-		this.response.writeHead(code, headers);
-		this.response.write(data);
-		this.response.end();
+	public json(object: any) {
+		this.res.setHeader('content-type', "application/json; charset=utf-8");
+		this.res.end(JSON.stringify(object));
 	}
 
-	//Send JSON
-	protected json(data: any, code: number = 200, headers: Headers = {}) {
-		this.response.writeHead(code, {
-			...headers,
-			"content-type": "application/json"
-		});
-		this.response.write(JSON.stringify(data));
-		this.response.end();
+	public text(text: string) {
+		this.res.setHeader('content-type', "text/plain; charset=utf-8");
+		this.res.end(text);
 	}
 
-	protected file(path: string, code: number = 200, headers: Headers = {}) {
-		if (!existsSync(path)) throw new ReferenceError("File noty Found");
+	public file(path: string) {
+		if (!existsSync(path))
+			throw new ReferenceError(`File ${path} is not exists.`);
 
-		this.res.writeHead(code, {
-			...headers,
-			"content-type": mime.getType(path) || "text/plain"
-		})
-		createReadStream(path).pipe(this.res);
+		this.res.setHeader('content-type', mime.getType(extname(path)) || 'text/plain');
+		return this.stream(createReadStream(path))
 	}
 
-	public getService(name: string): Service {
-		return this.services.get(name);
+	public stream(stream: Readable) {
+		return sendStream(stream, this.res);
 	}
 }
 
+
 export default Controller;
+export { Controller };

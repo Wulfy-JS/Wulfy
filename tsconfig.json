@@ -1,24 +1,17 @@
 {
-	"compilerOptions": {
-		"preserveConstEnums": true,
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"esModuleInterop": true,
-		"declaration": true,
-		"declarationDir": "types",
-		"lib": [
-			"ES2020",
-			"DOM"
-		],
-		"outDir": "dist",
-		"target": "ES2020",
-		"module": "ES2020",
-		"strict": true
-	},
-	"include": [
-		"src/**/*"
-	],
-	"exclude": [
-		"types/**/*"
-	]
+  "compilerOptions": {
+    "target": "es2016",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationDir": "types",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
 }

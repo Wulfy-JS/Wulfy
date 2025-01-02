@@ -1,5 +1,8 @@
 class HttpError extends Error {
-	constructor(message: string, public readonly code: number = 500) {
+	constructor(
+		public readonly code: number,
+		message: string
+	) {
 		super(message);
 	}
 }
