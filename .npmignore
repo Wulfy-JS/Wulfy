@@ -2,3 +2,7 @@ dist/test
 static
 src
 types/test
+.env
+.env.example
+README.RU.md
+tsconfig.json

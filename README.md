@@ -1,5 +1,4 @@
 # Wulfy 0.3
-[ **EN** | [RU](README.RU.MD) ]
 
 <img src="static/icon.svg" width="250" title="Temporary icon Wulfy"/> [^1]
 [^1]: Icon download from [svgrepo.con](https://www.svgrepo.com/svg/89615/wolf-head)
