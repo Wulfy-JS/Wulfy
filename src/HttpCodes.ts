@@ -167,6 +167,7 @@ function isHttpCode(a: any): a is HttpCode {
 
 export default HttpCodes;
 export {
+	HttpCodes,
 	getMessageByCode,
 	isHttpCode
 }

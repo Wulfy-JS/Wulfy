@@ -1,7 +1,4 @@
-import Controller from "../Controller.js";
-import HttpCodes from "../HttpCodes.js";
-import HttpError from "../HttpError.js";
-import { Error, Route, Router } from "../Route.js";
+import { Controller, HttpError, HttpCodes, Error, Route, Router } from "../index.js";
 
 @Router({
 	path: "/",

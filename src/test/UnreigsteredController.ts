@@ -1,5 +1,4 @@
-import Controller from "../Controller.js";
-import { Error, Route, Router } from "../Route.js";
+import { Controller, Error, Route, Router } from "../index.js";
 import App from "./App.js";
 
 @Router({
