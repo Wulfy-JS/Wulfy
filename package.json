@@ -10,8 +10,8 @@
   ],
   "repository": "https://github.com/Wulfy-JS/Wulfy",
   "main": "dist/index.js",
-  "type": "module",
   "types": "types/index.d.ts",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/test/index.ts",
     "build": "tsc",
@@ -23,6 +23,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "mime": "^4.0.6",
     "reflect-metadata": "^0.2.2"
   }

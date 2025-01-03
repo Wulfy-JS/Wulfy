@@ -14,10 +14,12 @@
     - [x] json
     - [x] file
     - [x] stream
+    - [x] redirect
+    - [x] statusCode
 - [x] Controllers Router
   - [x] Errors Router
   - [x] unregister
 - [x] Statics Router
   - [x] unregister
   - [ ] support glob
-- [ ] DotEnv
+- [x] DotEnv

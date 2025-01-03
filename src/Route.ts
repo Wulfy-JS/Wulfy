@@ -1,4 +1,5 @@
 import Controller from "./Controller.js";
+import HttpError from "./HttpError.js";
 import type { Range } from "./utils/Range.js";
 
 type HttpMethod = "get" | "head" | "post" | "put" | "delete" | "connect" | "options" | "trace" | "patch";
@@ -91,9 +92,9 @@ function isRegExpRouteInfo(route: RouteInfo<any>): route is RegExpRouteInfo<any>
 
 
 type ErrorCode = number | Range | (number | Range)[];
-function Error<C extends Controller>(code: ErrorCode): (target: C, method: ControllerMethod<C, void>) => void | TypedPropertyDescriptor<() => void> {
-	return (target, method: string) => {
-		defineErrorMetadata(target.constructor as typeof Controller, code, method);
+function Error<C extends Controller>(code: ErrorCode): (target: C, method: ControllerMethod<C, HttpError>) => void {
+	return (target, method: ControllerMethod<C, HttpError>) => {
+		defineErrorMetadata(target.constructor as typeof Controller, code, method as string);
 	}
 }
 

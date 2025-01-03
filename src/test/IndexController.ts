@@ -1,4 +1,5 @@
 import Controller from "../Controller.js";
+import HttpCodes from "../HttpCodes.js";
 import HttpError from "../HttpError.js";
 import { Error, Route, Router } from "../Route.js";
 
@@ -12,23 +13,37 @@ class IndexController extends Controller {
 		this.text("Hello, World!");
 	}
 
+	@Route({ path: "/json" })
+	public test_json() {
+		this.json({ id: 0, name: "World", age: 1e9 });
+	}
+
+	@Route({ path: "/redirect" })
+	public test_redirect() {
+		this.redirect("https://google.com/", HttpCodes.FOUND);
+	}
+
+	@Route({ path: "/timeout" })
+	public test_timeout() {
+		setTimeout(() => this.res.end("Hello, Timeout"), 2000);
+	}
+
 	@Route({
 		path: /\/test\/(\d+)$/,
 		match: (matches) => {
-			console.log(matches);
 			return {
 				id: parseInt(matches[1])
 			}
 		},
 		name: "test"
 	}) // { method: 'get', name: 'get', path: "/" }
-	public test({ id }: { id: number }) {
+	public test_params({ id }: { id: number }) {
 		this.text(`Hello, Test #${id}!`);
 	}
 
 	@Route({ path: "test" })
-	public test2() {
-		throw new HttpError(500, "Fuck");
+	public test_error() {
+		throw new HttpError(500);
 	}
 
 	@Error(404)
@@ -38,8 +53,8 @@ class IndexController extends Controller {
 	}
 
 	@Error({ min: 400, max: 500 })
-	public error() {
-		this.text(`Error ${this.res.statusCode}`)
+	public error(error: HttpError) {
+		this.text(`IndexControllerError: ${error.code} - ${error.message}\n${error.stack}`)
 	}
 }
 

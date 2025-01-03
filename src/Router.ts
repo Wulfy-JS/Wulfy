@@ -217,13 +217,13 @@ class Router {
 		res.statusMessage = err.message;
 
 		const handlerObject = this.getErrorHandler(req.url, err);
-		if (!handlerObject) return;
+		if (!handlerObject) throw err;
 
 		const controller = new handlerObject.controller(req, res);
 		const handler = (<(params?: any) => Promise<void>>controller[handlerObject.handler as keyof Controller]);
-		if (!handler) return;
+		if (!handler) throw err;
 
-		await handler.call(controller);
+		await handler.call(controller, err);
 	}
 }
 
