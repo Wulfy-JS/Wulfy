@@ -1,26 +1,23 @@
-import { Controller, HttpError, HttpCodes, Error, Route, Router } from "../index.js";
+import { Controller, HttpError, HttpCodes, Error, Route } from "../index.js";
 
-@Router({
-	path: "/",
-	name: "index"
-})
+@Route // path: '/'
 class IndexController extends Controller {
-	@Route({ path: "/" }) // { method: 'get', name: 'index', path: "/" }
+	@Route // { method: 'get', path: "/" }
 	public index() {
 		this.text("Hello, World!");
 	}
 
-	@Route({ path: "/json" })
+	@Route("/json")
 	public test_json() {
 		this.json({ id: 0, name: "World", age: 1e9 });
 	}
 
-	@Route({ path: "/redirect" })
+	@Route("/redirect")
 	public test_redirect() {
 		this.redirect("https://google.com/", HttpCodes.FOUND);
 	}
 
-	@Route({ path: "/timeout" })
+	@Route("/timeout")
 	public test_timeout() {
 		setTimeout(() => this.res.end("Hello, Timeout"), 2000);
 	}
@@ -32,13 +29,12 @@ class IndexController extends Controller {
 				id: parseInt(matches[1])
 			}
 		},
-		name: "test"
-	}) // { method: 'get', name: 'get', path: "/" }
-	public test_params({ id }: { id: number }) {
+	})
+	public async test_params({ id }: { id: number }) {
 		this.text(`Hello, Test #${id}!`);
 	}
 
-	@Route({ path: "test" })
+	@Route("test")
 	public test_error() {
 		throw new HttpError(500);
 	}
@@ -46,7 +42,7 @@ class IndexController extends Controller {
 	@Error(404)
 	public error404() {
 		this.res.statusCode = 404;
-		this.text("Ooops... 404 Not found");
+		this.text("IndexController: 404 Not found");
 	}
 
 	@Error({ min: 400, max: 500 })
@@ -54,5 +50,6 @@ class IndexController extends Controller {
 		this.text(`IndexControllerError: ${error.code} - ${error.message}\n${error.stack}`)
 	}
 }
+
 
 export default IndexController;

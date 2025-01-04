@@ -1,5 +1,5 @@
 import { Readable } from "stream";
-import { Response } from "../Wulfy.js";
+import { Response } from "../Router/HttpMethod.js";
 
 function sendStream(stream: Readable, res: Response) {
 	stream.pipe(res);

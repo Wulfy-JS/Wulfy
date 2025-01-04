@@ -1,19 +1,16 @@
-import { Controller, Error, Route, Router } from "../index.js";
+import { Controller, Error, Route } from "../index.js";
 import App from "./App.js";
 
-@Router({
-	name: "unregistered",
-	path: "/unreg"
-})
+@Route("/unreg")
 class UnregisteredController extends Controller {
-	@Route({ path: "/" })
+	@Route
 	public index() {
 		this.text("Hello, Unregistered!");
 	}
 
-	@Route({ path: '/disable' })
+	@Route('/disable')
 	public test_runtime_disable() {
-		App.getInstance().router.unregister(UnregisteredController);
+		App.getInstance().subRouter.unregister(UnregisteredController);
 		this.text("Try reload page");
 	}
 

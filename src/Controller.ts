@@ -1,6 +1,6 @@
 
 import { Readable } from "stream";
-import { Request, Response } from "./Wulfy.js";
+import { Request, Response } from "./Router/HttpMethod.js";
 import { createReadStream, existsSync } from "fs";
 import mime from 'mime';
 import { extname } from "path";

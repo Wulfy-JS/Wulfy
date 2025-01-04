@@ -1,9 +1,9 @@
 import { createReadStream, existsSync, readdirSync, statSync } from "fs";
-import { Request, Response } from "./Wulfy.js";
 import { extname, resolve } from "path";
 import { resolve as posix_resolve } from "path/posix";
 import mime from 'mime';
-import sendStream from "./utils/sendStream.js";
+import sendStream from "../utils/sendStream.js";
+import { Request, Response } from "./HttpMethod.js";
 interface StaticOptions {
 	dynamic?: boolean
 	ignored?: string[]

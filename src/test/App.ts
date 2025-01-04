@@ -1,21 +1,23 @@
-import Wulfy from "../index.js";
+import Wulfy, { Router } from "../index.js";
 import IndexController from "./IndexController.js";
 import UnregisteredController from "./UnreigsteredController.js";
 
 class App extends Wulfy {
+	public readonly subRouter = new Router('/test');
+
 	protected __start(): void | Promise<void> {
+		this.subRouter.register(UnregisteredController);
 		this.router.register(
-			IndexController,
-			UnregisteredController,
+			this.subRouter,
+			IndexController
 		);
 
 		this.static.register('/', 'static')
-		// this.router.unregister(UnregisteredController);
 	}
 	protected __stop(): void | Promise<void> {
 		this.router.unregister(
 			IndexController,
-			UnregisteredController,
+			this.subRouter,
 		);
 
 		this.static.unregister('/')

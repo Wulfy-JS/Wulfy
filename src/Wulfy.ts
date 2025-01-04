@@ -1,21 +1,15 @@
-import { IncomingMessage, Server, ServerResponse } from "http";
+import { Server } from "http";
 import { Server as SecureServer } from "https";
-import { Router } from "./Router.js";
-import { HttpMethod } from "./Route.js";
+import { Router } from "./Router/Router.js";
 import { resolve } from "path/posix";
-import StaticRouter from "./StaticRouter.js";
+import StaticRouter from "./Router/StaticRouter.js";
 import HttpError from "./HttpError.js";
 import HttpCodes from "./HttpCodes.js";
 import dotenv from 'dotenv';
 import { getBoolean, getInteger, getString } from "./utils/getEnvValue.js";
 import { DEFAULT_HOSTNAME, DEFAULT_HTTP_PORT, DEFAULT_HTTPS_PORT, DEFAULT_TIMEOUT } from "./consts.js";
 import getSecureContext from "./utils/getSecureContext.js";
-
-interface Request extends IncomingMessage {
-	url: string;
-	method: HttpMethod;
-}
-interface Response extends ServerResponse<Request> { }
+import { HttpMethod, Request, Response } from "./Router/HttpMethod.js";
 
 class Wulfy {
 
@@ -45,10 +39,10 @@ class Wulfy {
 	private _server = new Server();
 	private _secServer: SecureServer = new SecureServer();
 
-	public readonly router = new Router();
+	public readonly router = new Router('/');
 	public readonly static = new StaticRouter();
 
-	protected constructor() {
+	public constructor() {
 		this.handleSIGINT = this.handleSIGINT.bind(this);
 		this.handleRequest = this.handleRequest.bind(this);
 		this.redirectToSSL = this.redirectToSSL.bind(this);
@@ -59,15 +53,11 @@ class Wulfy {
 	}
 
 	private async handleError(req: Request, res: Response, error: any) {
-		try {
-			await this.router.error(req, res, HttpError.from(error, HttpCodes.INTERNAL_SERVER_ERROR));
-		} catch (e: any) {
-			let error = HttpError.from(e, HttpCodes.INTERNAL_SERVER_ERROR);
+		error = HttpError.from(error, HttpCodes.INTERNAL_SERVER_ERROR);
 
-			res.statusCode = error.code;
-			res.statusMessage = error.message;
-			res.end(error.stack || e);
-		}
+		res.statusCode = error.code;
+		res.statusMessage = error.message;
+		res.end();
 	}
 
 	private async handleRequest(req: Request, res: Response) {
@@ -79,13 +69,12 @@ class Wulfy {
 		try {
 			const timeout = setTimeout(() => this.handleError(req, res, new HttpError(HttpCodes.REQUEST_TIMEOUT)), this.timeout);
 
-			if (await this.router.request(req, res)) return;
-
 			if (await this.static.request(req, res)) return;
+
+			await this.router.request(req, res)
 
 			clearTimeout(timeout);
 
-			await this.router.error(req, res, new HttpError(HttpCodes.NOT_FOUND));
 		} catch (error: any) {
 			await this.handleError(req, res, error);
 		}
@@ -147,13 +136,11 @@ class Wulfy {
 
 	private static _instance: Wulfy;
 
-	public static getInstance() {
+	public static getInstance<T extends Wulfy>(this: { new(): T } & typeof Wulfy): T {
 		if (!this._instance)
 			this._instance = new this();
-		return this._instance;
+		return <T>this._instance;
 	}
 }
 
 export default Wulfy;
-
-export type { Request, Response };
