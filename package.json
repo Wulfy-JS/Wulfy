@@ -18,6 +18,14 @@
   "homepage": "https://github.com/Wulfy-JS/Wulfy#readme",
   "devDependencies": {
     "@types/node": "^26.4.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "check": "npm run typecheck && npm run test:run"
   }
 }
