@@ -1,0 +1,23 @@
+{
+  "name": "wulfy",
+  "version": "0.4.0",
+  "description": "Simple http-framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wulfy-JS/Wulfy.git"
+  },
+  "keywords": [
+    "http"
+  ],
+  "author": "80LK",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Wulfy-JS/Wulfy/issues"
+  },
+  "homepage": "https://github.com/Wulfy-JS/Wulfy#readme",
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^7.0.2"
+  }
+}
