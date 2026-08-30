@@ -1,13 +1,45 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeSegment, segmentatePath } from '../src/utils.js'
+import { normalizeSegment, segmentatePath, type Segment } from '../src/utils.js'
 
 describe("Segmentation path", () => {
-	const tests: Record<string, string[]> = {
+	const tests: Record<string, Segment[]> = {
 		"/": [],
-		"/user": ["user"],
-		"/user/:id": ['user', ':id'],
-		"/user/test": ['user', "test"],
-		"/user/*": ['user', "*"]
+		"/user": [
+			{
+				type: "static",
+				value: "user",
+			}
+		],
+		"/user/:id": [
+			{
+				type: "static",
+				value: "user",
+			},
+			{
+				type: "parameter",
+				value: "id",
+			}
+		],
+		"/user/test": [
+			{
+				type: "static",
+				value: "user",
+			},
+			{
+				type: "static",
+				value: "test",
+			},
+		],
+		"/user/*": [
+			{
+				type: "static",
+				value: "user",
+			},
+			{
+				type: "static",
+				value: "*",
+			},
+		]
 	}
 
 	for (const path in tests) {
